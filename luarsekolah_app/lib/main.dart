@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/register_page.dart';
+import 'pages/home_page.dart';
 
 void main() {
   runApp(const MainApp());
@@ -15,6 +16,7 @@ class MainApp extends StatelessWidget {
       initialRoute: '/register',
       routes: {
         '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
       },
       debugShowCheckedModeBanner: false,
     );
