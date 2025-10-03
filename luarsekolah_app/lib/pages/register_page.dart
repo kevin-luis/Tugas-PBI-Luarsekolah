@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:luarsekolah_app/pages/home_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -26,17 +27,26 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _handleRegister() {
-    if (_formKey.currentState!.validate() && _isNotRobot) {
-      // Handle registration logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mendaftarkan akun...')),
+  if (_formKey.currentState!.validate() && _isNotRobot) {
+    // Handle registration logic here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Mendaftarkan akun...')),
+    );
+
+    // Navigasi ke HomePage setelah register sukses
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    } else if (!_isNotRobot) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan centang "I\'m not a robot"')),
-      );
-    }
+    });
+  } else if (!_isNotRobot) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Silakan centang "I\'m not a robot"')),
+    );
   }
+}
+
 
   void _handleGoogleSignIn() {
     // Handle Google sign in logic here
