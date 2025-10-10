@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pages/register_page.dart';
-import 'pages/home_page.dart';
+import 'pages/main_navigation.dart';
+import 'pages/login_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,12 +15,20 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Luarsekolah App',
-      initialRoute: '/register',
+      theme: ThemeData(
+        // textTheme: GoogleFonts.poppinsTextTheme(
+        //   Theme.of(context).textTheme,
+        // ),
+        fontFamily: GoogleFonts.poppins().fontFamily,
+      ),
+      initialRoute: '/login',
       routes: {
+        '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(),
+        '/main': (context) => const MainNavigation(),
       },
       debugShowCheckedModeBanner: false,
     );
   }
 }
+
