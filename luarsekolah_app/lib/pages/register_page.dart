@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:luarsekolah_app/pages/home_page.dart';
+import '../widgets/widgets.dart';
+import 'main_navigation.dart';
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -14,8 +16,23 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+
+  bool _isNamaValid = false;
+  bool _isEmailValid = false;
+  bool _isPhoneValid = false;
+  bool _isPasswordValid = false;
   bool _isNotRobot = false;
+  bool _isFormValid = false;
+  bool _isLoading = false;
+
+  void _checkForm() {
+    final valid = _isNamaValid && _isEmailValid && _isPhoneValid && _isPasswordValid && _isNotRobot;
+    if (valid != _isFormValid) {
+      setState(() => _isFormValid = valid);
+    }
+  }
+
+
 
   @override
   void dispose() {
@@ -26,30 +43,27 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  void _handleRegister() {
+
+
+  Future<void> _handleRegister() async {
   if (_formKey.currentState!.validate() && _isNotRobot) {
-    // Handle registration logic here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Mendaftarkan akun...')),
+    setState(() => _isLoading = true);
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigation()),
+      (Route<dynamic> route) => false,
     );
 
-    // Navigasi ke HomePage setelah register sukses
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    });
-  } else if (!_isNotRobot) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Silakan centang "I\'m not a robot"')),
-    );
+    setState(() => _isLoading = false);
   }
 }
 
 
   void _handleGoogleSignIn() {
-    // Handle Google sign in logic here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Mendaftar dengan Google...')),
     );
@@ -67,360 +81,136 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo
-                Image.asset('assets/images/ls-logo-text.png', 
-                width: 78,
-                height: 40,
-                fit: BoxFit.contain,
-                ),
+                const LogoImage(),
                 const SizedBox(height: 24),
-
-                // Title
-                const Text(
-                  'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Subtitle
-                const Text(
-                  'Satu akun untuk akses Luarsekolah dan BelajarBekerja',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
+                const MainTitle(title: 'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah'),
                 const SizedBox(height: 24),
-
-                // Google Sign In Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _handleGoogleSignIn,
-                    icon: Image.network(
-                      'https://www.google.com/favicon.ico',
-                      width: 20,
-                      height: 20,
-                    ),
-                    label: const Text(
-                      'Daftar dengan Google',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.grey),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                  ),
-                ),
+                GoogleSignInButton(onPressed: _handleGoogleSignIn),
                 const SizedBox(height: 16),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'atau gunakan email',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                  ],
-                ),
+                const DividerWithText(text: 'atau gunakan email'),
                 const SizedBox(height: 24),
-
-                // Nama Lengkap
-                const Text(
-                  'Nama Lengkap',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
+                DynamicTextField(
+                  label: 'Nama Lengkap',
                   controller: _namaController,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan nama lengkapmu',
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                  type: FieldType.generic,
+                  hintText: 'Masukkan nama lengkap',
+                  rules: [
+                    ValidationRule(
+                      message: 'Nama tidak boleh kosong',
+                      validate: (s) => s.trim().isNotEmpty,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ValidationRule(
+                      message: 'Gunakan hanya huruf dan spasi',
+                      validate: (s) => RegExp(r'^[A-Za-z\s]+$').hasMatch(s),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Nama lengkap tidak boleh kosong';
-                    }
-                    return null;
+                    ValidationRule(
+                      message: 'Minimal 2 kata (nama depan & belakang)',
+                      validate: (s) => s.trim().split(' ').length >= 2,
+                    ),
+                  ],
+                  onValidationChanged: (v) {
+                    _isNamaValid = v;
+                    _checkForm();
                   },
                 ),
-                const SizedBox(height: 16),
 
-                // Email Aktif
-                const Text(
-                  'Email Aktif',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan alamat emailmu',
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email tidak boleh kosong';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Email tidak valid';
-                    }
-                    return null;
-                  },
-                ),
                 const SizedBox(height: 16),
-
-                // Nomor Whatsapp Aktif
-                const Text(
-                  'Nomor Whatsapp Aktif',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                DynamicTextField(
+                label: 'Email',
+                controller: _emailController,
+                type: FieldType.email,
+                hintText: 'nama@domain.com',
+                rules: [
+                  ValidationRule(
+                    message: 'Format email harus valid',
+                    validate: (s) => RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(s),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
+                ],
+                onValidationChanged: (v) {
+                  _isEmailValid = v;
+                  _checkForm();
+                },
+              ),
+
+              
+                const SizedBox(height: 16),
+                DynamicTextField(
+                  label: 'Nomor HP',
                   controller: _whatsappController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan nomor whatsapp yang bisa dihubungi',
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                  type: FieldType.phone,
+                  hintText: '62xxxxxxxxxx',
+                  rules: [
+                    ValidationRule(
+                      message: 'Harus diawali dengan 62',
+                      validate: (s) => s.startsWith('62'),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ValidationRule(
+                      message: 'Minimal 10 angka',
+                      validate: (s) => s.length >= 10,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Nomor WhatsApp tidak boleh kosong';
-                    }
-                    else if (value.length < 10) {
-                      return 'Nomor WhatsApp tidak valid';
-                    }
-                    else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                      return 'Nomor WhatsApp hanya boleh berisi angka';
-                    }
-                    return null;
+                  ],
+                  onValidationChanged: (v) {
+                    _isPhoneValid = v;
+                    _checkForm();
                   },
                 ),
-                const SizedBox(height: 16),
 
-                // Password
-                const Text(
-                  'Password',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
+                const SizedBox(height: 16),
+                DynamicTextField(
+                  label: 'Password',
                   controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    hintText: 'Masukkan password untuk akunmu',
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                  type: FieldType.password,
+                  hintText: 'Masukkan password Anda',
+                  rules: [
+                    ValidationRule(
+                      message: 'Minimal 8 karakter',
+                      validate: (s) => s.length >= 8,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ValidationRule(
+                      message: 'Mengandung 1 huruf kapital',
+                      validate: (s) => RegExp(r'[A-Z]').hasMatch(s),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                    ValidationRule(
+                      message: 'Mengandung 1 angka',
+                      validate: (s) => RegExp(r'\d').hasMatch(s),
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password tidak boleh kosong';
-                    }
-                    if (value.length < 6) {
-                      return 'Password minimal 6 karakter';
-                    }
-                    return null;
+                    ValidationRule(
+                      message: 'Mengandung 1 simbol (!,@,#,dll)',
+                      validate: (s) => RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(s),
+                    ),
+                  ],
+                  onValidationChanged: (v) {
+                    _isPasswordValid = v;
+                    _checkForm();
                   },
                 ),
-                const SizedBox(height: 16),
 
-                // reCAPTCHA Checkbox
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    children: [
-                      Checkbox(
-                        value: _isNotRobot,
-                        onChanged: (value) {
-                          setState(() {
-                            _isNotRobot = value ?? false;
-                          });
-                        },
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      const Text(
-                        "I'm not a robot",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Image.network(
-                            'https://www.gstatic.com/recaptcha/api2/logo_48.png',
-                            width: 32,
-                            height: 32,
-                          ),
-                          const Text(
-                            'reCAPTCHA',
-                            style: TextStyle(fontSize: 8, color: Colors.grey),
-                          ),
-                          const Text(
-                            'Privacy - Terms',
-                            style: TextStyle(fontSize: 7, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+
+                const SizedBox(height: 16),
+                RecaptchaBox(
+                value: _isNotRobot,
+                onChanged: (v) {
+                  setState(() {
+                    _isNotRobot = v;
+                  });
+                  _checkForm();
+                },
+              ),
+
                 const SizedBox(height: 24),
-
-                // Register Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _handleRegister,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.grey[600],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: const Text(
-                      'Daftarkan Akun',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+                PrimaryButton(
+                  label: 'Daftarkan Akun',
+                  loadingText: 'Mendaftarkan Akunmu...',
+                  enabled: _isFormValid,
+                  onPressed: _handleRegister,
                 ),
                 const SizedBox(height: 16),
-
-                // Terms and conditions
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 12, color: Colors.black87),
-                    children: [
-                      const TextSpan(text: 'Dengan mendaftar di Luarsekolah, kamu menyetujui '),
-                      TextSpan(
-                        text: 'syarat dan ketentuan kami',
-                        style: TextStyle(color: Colors.blue[700]),
-                      ),
-                    ],
-                  ),
-                ),
+                const TermsText(),
                 const SizedBox(height: 16),
-
-                // Login link
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('👋', style: TextStyle(fontSize: 16)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(fontSize: 13, color: Colors.black87),
-                            children: [
-                              const TextSpan(text: 'Sudah punya akun? '),
-                              TextSpan(
-                                text: 'Masuk ke akunmu',
-                                style: TextStyle(
-                                  color: Colors.blue[700],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                const LoginInfoBox(
+                  questionText: 'Sudah punya akun?',
+                  actionText: 'Masuk ke akunmu',
+                  navigateTo: LoginPage(),
                 ),
               ],
             ),
