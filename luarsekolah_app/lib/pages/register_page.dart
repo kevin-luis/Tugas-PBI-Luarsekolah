@@ -26,13 +26,15 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
 
   void _checkForm() {
-    final valid = _isNamaValid && _isEmailValid && _isPhoneValid && _isPasswordValid && _isNotRobot;
+    final valid = _isNamaValid &&
+        _isEmailValid &&
+        _isPhoneValid &&
+        _isPasswordValid &&
+        _isNotRobot;
     if (valid != _isFormValid) {
       setState(() => _isFormValid = valid);
     }
   }
-
-
 
   @override
   void dispose() {
@@ -43,25 +45,40 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-
-
   Future<void> _handleRegister() async {
-  if (_formKey.currentState!.validate() && _isNotRobot) {
-    setState(() => _isLoading = true);
+    if (_formKey.currentState!.validate() && _isNotRobot) {
+      setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainNavigation()),
-      (Route<dynamic> route) => false,
-    );
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 900),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const MainNavigation(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final slide = Tween(begin: const Offset(0.5, 0), end: Offset.zero)
+                .animate(CurvedAnimation(
+                    parent: animation, curve: Curves.easeOutExpo));
+            final fade = Tween(begin: 0.0, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+            return SlideTransition(
+              position: slide,
+              child: FadeTransition(
+                opacity: fade,
+                child: child,
+              ),
+            );
+          },
+        ),
+        (Route<dynamic> route) => false,
+      );
 
-    setState(() => _isLoading = false);
+      setState(() => _isLoading = false);
+    }
   }
-}
-
 
   void _handleGoogleSignIn() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +100,8 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 const LogoImage(),
                 const SizedBox(height: 24),
-                const MainTitle(title: 'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah'),
+                const MainTitle(
+                    title: 'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah'),
                 const SizedBox(height: 24),
                 GoogleSignInButton(onPressed: _handleGoogleSignIn),
                 const SizedBox(height: 16),
@@ -113,26 +131,25 @@ class _RegisterPageState extends State<RegisterPage> {
                     _checkForm();
                   },
                 ),
-
                 const SizedBox(height: 16),
                 DynamicTextField(
-                label: 'Email',
-                controller: _emailController,
-                type: FieldType.email,
-                hintText: 'nama@domain.com',
-                rules: [
-                  ValidationRule(
-                    message: 'Format email harus valid',
-                    validate: (s) => RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(s),
-                  ),
-                ],
-                onValidationChanged: (v) {
-                  _isEmailValid = v;
-                  _checkForm();
-                },
-              ),
-
-              
+                  label: 'Email',
+                  controller: _emailController,
+                  type: FieldType.email,
+                  hintText: 'nama@domain.com',
+                  rules: [
+                    ValidationRule(
+                      message: 'Format email harus valid',
+                      validate: (s) =>
+                          RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(s),
+                    ),
+                  ],
+                  onValidationChanged: (v) {
+                    _isEmailValid = v;
+                    _checkForm();
+                  },
+                ),
                 const SizedBox(height: 16),
                 DynamicTextField(
                   label: 'Nomor HP',
@@ -154,7 +171,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     _checkForm();
                   },
                 ),
-
                 const SizedBox(height: 16),
                 DynamicTextField(
                   label: 'Password',
@@ -176,7 +192,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     ValidationRule(
                       message: 'Mengandung 1 simbol (!,@,#,dll)',
-                      validate: (s) => RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(s),
+                      validate: (s) =>
+                          RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(s),
                     ),
                   ],
                   onValidationChanged: (v) {
@@ -184,19 +201,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     _checkForm();
                   },
                 ),
-
-
                 const SizedBox(height: 16),
                 RecaptchaBox(
-                value: _isNotRobot,
-                onChanged: (v) {
-                  setState(() {
-                    _isNotRobot = v;
-                  });
-                  _checkForm();
-                },
-              ),
-
+                  value: _isNotRobot,
+                  onChanged: (v) {
+                    setState(() {
+                      _isNotRobot = v;
+                    });
+                    _checkForm();
+                  },
+                ),
                 const SizedBox(height: 24),
                 PrimaryButton(
                   label: 'Daftarkan Akun',

@@ -5,7 +5,7 @@ class LoginInfoBox extends StatelessWidget {
   final String emoji;
   final String questionText;
   final String actionText;
-  final Widget navigateTo; // halaman tujuan saat teks diklik
+  final Widget navigateTo;
   final Color? backgroundColor;
 
   const LoginInfoBox({
@@ -17,6 +17,34 @@ class LoginInfoBox extends StatelessWidget {
     this.backgroundColor,
   });
 
+  void _navigateWithAnimation(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        reverseTransitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (_, animation, __) => navigateTo,
+        transitionsBuilder: (_, animation, __, child) {
+          final slide = Tween<Offset>(
+            begin: const Offset(1, 0), // dari kanan
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ));
+
+          return SlideTransition(
+            position: slide,
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,7 +52,7 @@ class LoginInfoBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.blue[50],
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Color(0xFF2570EB)),
+        border: Border.all(color: const Color(0xFF2570EB)),
       ),
       child: Row(
         children: [
@@ -34,26 +62,21 @@ class LoginInfoBox extends StatelessWidget {
             child: RichText(
               text: TextSpan(
                 style: DefaultTextStyle.of(context).style.copyWith(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
                 children: [
                   TextSpan(text: '$questionText '),
                   TextSpan(
                     text: actionText,
-                    style: DefaultTextStyle.of(context).style.copyWith(
+                    style: TextStyle(
                       fontSize: 14,
                       color: Colors.blue[700],
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => navigateTo),
-                        );
-                      },
+                      ..onTap = () => _navigateWithAnimation(context),
                   ),
                 ],
               ),

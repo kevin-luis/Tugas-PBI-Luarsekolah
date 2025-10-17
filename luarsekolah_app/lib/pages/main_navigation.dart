@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../pages/home_page.dart';
-import '../pages/account_page.dart';
+import '../pages/class_page.dart';
+import '../pages/account_menu_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -11,39 +13,70 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  final List<Widget> _pages = [
-    const HomePage(),
-    const AccountPage(),
+
+  final _pages = const [
+    HomePage(),
+    ClassPage(),
+    AccountMenuPage(),
   ];
-  
+
+  final _destinations = const [
+    NavigationDestination(
+      icon: Icon(Icons.home_outlined),
+      selectedIcon: Icon(Icons.home),
+      label: 'Beranda',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.video_library_outlined),
+      selectedIcon: Icon(Icons.video_library),
+      label: 'Kelas',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.person_outline),
+      selectedIcon: Icon(Icons.person),
+      label: 'Akun Saya',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        showUnselectedLabels: true,
-        selectedItemColor: const Color(0xFF26A69A),
-        unselectedItemColor: Colors.grey,
+    const primaryColor = Color(0xFF0EA781);
+    const inactiveColor = Color(0xFF6C6F70);
 
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Akun Saya',
-          ),
-        ],
+    return Scaffold(
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeInOut,
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+      ),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: primaryColor.withOpacity(0.15),
+          iconTheme: WidgetStateProperty.resolveWith((states) =>
+              IconThemeData(
+                  color: states.contains(WidgetState.selected)
+                      ? primaryColor
+                      : inactiveColor)),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) =>
+              TextStyle(
+                  color: states.contains(WidgetState.selected)
+                      ? primaryColor
+                      : inactiveColor,
+                  fontWeight: states.contains(WidgetState.selected)
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  fontSize: 13)),
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) => setState(() => _currentIndex = index),
+          destinations: _destinations,
+          animationDuration: const Duration(milliseconds: 300),
+        ),
       ),
     );
   }
