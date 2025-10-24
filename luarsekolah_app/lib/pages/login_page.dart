@@ -34,25 +34,46 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
-  if (_formKey.currentState!.validate() && _isNotRobot) {
-    // tampilkan snackbar atau lakukan aksi awal
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Masuk ke akun...')),
-    );
+    if (_formKey.currentState!.validate() && _isNotRobot) {
+      // tampilkan snackbar atau lakukan aksi awal
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masuk ke akun...')),
+      );
 
-    // tunggu 1 detik (loading simulasi)
-    await Future.delayed(const Duration(seconds: 3));
+      // tunggu 1 detik (loading simulasi)
+      await Future.delayed(const Duration(seconds: 3));
 
-    // setelah itu navigasi dan hapus semua route sebelumnya
-    if (!mounted) return; // amankan context
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainNavigation()),
-      (Route<dynamic> route) => false,
-    );
+      // setelah itu navigasi dan hapus semua route sebelumnya
+      if (!mounted) return; // amankan context
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 900),
+          reverseTransitionDuration: const Duration(milliseconds: 600),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const MainNavigation(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final slide = Tween(begin: const Offset(0.4, 0), end: Offset.zero)
+                .animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            ));
+
+            final fade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ));
+
+            return SlideTransition(
+              position: slide,
+              child: FadeTransition(opacity: fade, child: child),
+            );
+          },
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
   }
-}
-
 
   void _handleGoogleLogIn() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -74,7 +95,8 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 const LogoImage(),
                 const SizedBox(height: 24),
-                const MainTitle(title: 'Masuk ke Akunmu Untuk Lanjut Akses ke Luarsekolah'),
+                const MainTitle(
+                    title: 'Masuk ke Akunmu Untuk Lanjut Akses ke Luarsekolah'),
                 const SizedBox(height: 24),
 
                 GoogleLoginButton(onPressed: _handleGoogleLogIn),
@@ -92,7 +114,9 @@ class _LoginPageState extends State<LoginPage> {
                   rules: [
                     ValidationRule(
                       message: 'Format email @domain.com',
-                      validate: (s) => RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(s),
+                      validate: (s) =>
+                          RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(s),
                     ),
                   ],
                   onValidationChanged: (v) {

@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-
+import '../models/user_profile.dart';
+import '../services/shared_preferences_service.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -12,102 +16,150 @@ class _HomePageState extends State<HomePage> {
   int _currentBannerIndex = 0;
   final PageController _bannerController = PageController();
 
+  // Future untuk load profile - PENTING: buat sebagai variable, jangan panggil langsung di FutureBuilder
+  late Future<UserProfile> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = SharedPreferencesService.getUserProfile();
+  }
+
   @override
   void dispose() {
     _bannerController.dispose();
     super.dispose();
   }
 
+  Future<void> _refreshPage() async {
+    setState(() {
+      _profileFuture = SharedPreferencesService.getUserProfile();
+    });
+    // kalau kamu mau ambil data API, taruh di sini juga
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF26A69A),
-      body: CustomScrollView(
-        slivers: [
-          // ========== ANIMATED SLIVER HEADER ==========
-          // ========== ANIMATED SLIVER HEADER ==========
-          SliverAppBar(
-            expandedHeight: 120.0,
-            floating: false,
-            pinned: false, // Ini membuat AppBar "tenggelam" dan menempel di atas saat di-scroll
+    return FutureBuilder<UserProfile>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
             backgroundColor: const Color(0xFF26A69A),
-            elevation: 0,
-            // 👉 JANGAN TAMBAHKAN 'title' DI SINI
-            // Ini adalah kunci agar saat AppBar mengecil tidak ada teks yang muncul
-            
-            flexibleSpace: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                // 👉 PASTIKAN MENGGUNAKAN .clamp() UNTUK MENCEGAH ERROR
-                final double progress = ((constraints.maxHeight - kToolbarHeight) / 
-                    (120.0 - kToolbarHeight)).clamp(0.0, 1.0);
-                
-                return FlexibleSpaceBar(
-                  // 👉 JANGAN TAMBAHKAN 'title' DI SINI JUGA
-                  titlePadding: EdgeInsets.zero, // Penting: tidak ada ruang yang disiapkan untuk title
-                  background: Container(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                    child: SafeArea(
-                      // Widget _buildHeader akan memudar saat AppBar mengecil
-                      child: _buildHeader(progress),
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          );
+        }
+
+        final userProfile = snapshot.data ?? UserProfile.empty();
+
+        return Scaffold(
+            backgroundColor: const Color(0xFF26A69A),
+            body: RefreshIndicator(
+              onRefresh: _refreshPage,
+              color: const Color(0xFF26A69A),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: _refreshPage,
+                    builder: (context, refreshState, pulledExtent,
+                        triggerPullDistance, indicatorExtent) {
+                      final bool refreshing =
+                          refreshState == RefreshIndicatorMode.refresh ||
+                              refreshState == RefreshIndicatorMode.done;
+                      final double opacity =
+                          (pulledExtent / triggerPullDistance).clamp(0.0, 1.0);
+
+                      return SizedBox(
+                        height: pulledExtent,
+                        child: Center(
+                          child: Opacity(
+                            opacity: opacity,
+                            child: SizedBox(
+                              height: 80,
+                              child: Lottie.asset(
+                                'assets/lottie/sandy_loading.json',
+                                animate: refreshing,
+                                repeat: true,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  // SliverAppBar dengan profile
+                  SliverAppBar(
+                    expandedHeight: 120.0,
+                    floating: false,
+                    pinned: false,
+                    backgroundColor: const Color(0xFF26A69A),
+                    elevation: 0,
+                    flexibleSpace: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                        final double progress =
+                            ((constraints.maxHeight - kToolbarHeight) /
+                                    (120.0 - kToolbarHeight))
+                                .clamp(0.0, 1.0);
+
+                        return FlexibleSpaceBar(
+                          titlePadding: EdgeInsets.zero,
+                          background: Container(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                            child: SafeArea(
+                              child: _buildHeaderWithProfile(
+                                  progress, userProfile),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                );
-              },
-            ),
-          ),
 
-          // ========== KONTEN SCROLLABLE ==========
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  
-                  // Banner Carousel
-                  _buildBannerCarousel(),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Program Section
-                  _buildProgramSection(),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Voucher Section
-                  _buildVoucherSection(),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Popular Classes Section
-                  _buildPopularClassesSection(),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Subscriptions Section
-                  _buildSubscriptionsSection(),
-                  
-                  const SizedBox(height: 24),
+                  // Rest of your content...
+                  SliverToBoxAdapter(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(24),
+                          topRight: Radius.circular(24),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          _buildBannerCarousel(),
+                          const SizedBox(height: 24),
+                          _buildProgramSection(),
+                          const SizedBox(height: 16),
+                          _buildVoucherSection(),
+                          const SizedBox(height: 24),
+                          _buildPopularClassesSection(),
+                          const SizedBox(height: 24),
+                          _buildSubscriptionsSection(),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
+            ));
+      },
     );
   }
 
   // ========== HEADER WIDGET WITH ANIMATION ==========
-  Widget _buildHeader(double progress) {
-    // Opacity untuk animasi fade out saat scroll
+  Widget _buildHeaderWithProfile(double progress, UserProfile profile) {
     final double opacity = progress.clamp(0.0, 1.0);
-    
+    final String displayName =
+        profile.fullName.isNotEmpty ? profile.fullName : 'Pengguna';
+
     return Opacity(
       opacity: opacity,
       child: Row(
@@ -115,7 +167,6 @@ class _HomePageState extends State<HomePage> {
         children: [
           Row(
             children: [
-              // Avatar dengan animasi scale
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: 48,
@@ -124,11 +175,21 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.person, color: Colors.grey[600], size: 28),
+                child: ClipOval(
+                  child: profile.profileImage != null &&
+                          profile.profileImage!.isNotEmpty
+                      ? Image.file(
+                          File(profile.profileImage!),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(Icons.person,
+                                color: Colors.grey[600], size: 28);
+                          },
+                        )
+                      : Icon(Icons.person, color: Colors.grey[600], size: 28),
+                ),
               ),
               const SizedBox(width: 12),
-              
-              // Greeting Text
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -143,28 +204,23 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 2),
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'Ahmad Sahroni',
-                        style: TextStyle(
+                        displayName,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(width: 6),
-                      Text(
-                        '👋',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      const SizedBox(width: 6),
+                      const Text('👋', style: TextStyle(fontSize: 16)),
                     ],
                   ),
                 ],
               ),
             ],
           ),
-          
-          // Notification Button
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -196,14 +252,17 @@ class _HomePageState extends State<HomePage> {
               });
             },
             children: [
-              _buildNetworkBannerItem('https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F68-686e3078ac119.jpeg&w=1080&q=75'),
-              _buildNetworkBannerItem('https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F74-686e30fc501f5.jpeg&w=1080&q=75'),
-              _buildNetworkBannerItem('https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F76-68ad40156c2c4.png&w=1080&q=75'),
+              _buildNetworkBannerItem(
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F68-686e3078ac119.jpeg&w=1080&q=75'),
+              _buildNetworkBannerItem(
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F74-686e30fc501f5.jpeg&w=1080&q=75'),
+              _buildNetworkBannerItem(
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F76-68ad40156c2c4.png&w=1080&q=75'),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Indicator Dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -253,8 +312,8 @@ class _HomePageState extends State<HomePage> {
               child: Center(
                 child: CircularProgressIndicator(
                   value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / 
-                        loadingProgress.expectedTotalBytes!
+                      ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
                       : null,
                   color: const Color(0xFF26A69A),
                 ),
@@ -293,9 +352,12 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMenuItem(Icons.work_outline, 'Prakerja', const Color(0xFF42A5F5)),
-              _buildMenuItem(Icons.add_circle_outline, 'magang+', const Color(0xFFFF9800)),
-              _buildMenuItem(Icons.school_outlined, 'Subs', const Color(0xFFEF5350)),
+              _buildMenuItem(
+                  Icons.work_outline, 'Prakerja', const Color(0xFF42A5F5)),
+              _buildMenuItem(
+                  Icons.add_circle_outline, 'magang+', const Color(0xFFFF9800)),
+              _buildMenuItem(
+                  Icons.school_outlined, 'Subs', const Color(0xFFEF5350)),
               _buildMenuItem(Icons.apps, 'Lainnya', const Color(0xFF9E9E9E)),
             ],
           ),
@@ -482,7 +544,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildClassCard(String title, String price, double rating, Color color, IconData icon) {
+  Widget _buildClassCard(
+      String title, String price, double rating, Color color, IconData icon) {
     return Container(
       width: 240,
       margin: const EdgeInsets.only(right: 12),
@@ -504,7 +567,8 @@ class _HomePageState extends State<HomePage> {
             height: 120,
             decoration: BoxDecoration(
               color: color,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Stack(
               children: [
@@ -512,7 +576,8 @@ class _HomePageState extends State<HomePage> {
                   right: 12,
                   top: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.blue[700],
                       borderRadius: BorderRadius.circular(6),
@@ -571,7 +636,9 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.only(right: 2),
                         child: Icon(
                           Icons.star,
-                          color: index < rating.floor() ? Colors.amber[600] : Colors.grey[300],
+                          color: index < rating.floor()
+                              ? Colors.amber[600]
+                              : Colors.grey[300],
                           size: 14,
                         ),
                       ),
@@ -645,7 +712,10 @@ class _HomePageState extends State<HomePage> {
                 title: '5 Kelas Pembelajaran',
                 subtitle: 'Belajar SwiftUI Untuk Pembuatan Interface',
                 color: const Color(0xFF8B5CF6),
-                gradientColors: [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)],
+                gradientColors: [
+                  const Color(0xFF8B5CF6),
+                  const Color(0xFF7C3AED)
+                ],
                 icon: Icons.apple,
                 backgroundColor: Colors.purple[50]!,
               ),
@@ -653,7 +723,10 @@ class _HomePageState extends State<HomePage> {
                 title: '5 Kelas',
                 subtitle: 'Belajar Dart Untuk Pembuatan Aplikasi',
                 color: const Color(0xFF06B6D4),
-                gradientColors: [const Color(0xFF06B6D4), const Color(0xFF0891B2)],
+                gradientColors: [
+                  const Color(0xFF06B6D4),
+                  const Color(0xFF0891B2)
+                ],
                 icon: Icons.code,
                 backgroundColor: Colors.cyan[50]!,
               ),
@@ -698,7 +771,8 @@ class _HomePageState extends State<HomePage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Stack(
               children: [
