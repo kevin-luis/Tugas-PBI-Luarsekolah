@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
+import '../models/class_model.dart';
+import 'dart:convert';
 
 class SharedPreferencesService {
   // Keys
@@ -10,9 +12,128 @@ class SharedPreferencesService {
   static const String _keyAddress = 'address';
   static const String _keyProfileImage = 'profileImage';
 
+  static const String _keyClasses = 'classes';
+
   // Get SharedPreferences instance
   static Future<SharedPreferences> get _instance async =>
       await SharedPreferences.getInstance();
+
+  
+  // Save a class
+  static Future<bool> saveClass(ClassModel classModel) async {
+    try {
+      final prefs = await _instance;
+      
+      // Get existing classes
+      final classes = await getAllClasses();
+      
+      // Check if class already exists (update) or add new
+      final existingIndex = classes.indexWhere((c) => c.id == classModel.id);
+      
+      if (existingIndex >= 0) {
+        // Update existing class
+        classes[existingIndex] = classModel;
+      } else {
+        // Add new class
+        classes.add(classModel);
+      }
+      
+      // Convert to JSON list
+      final jsonList = classes.map((c) => c.toJson()).toList();
+      final jsonString = json.encode(jsonList);
+      
+      return await prefs.setString(_keyClasses, jsonString);
+    } catch (e) {
+      print('Error saving class: $e');
+      return false;
+    }
+  }
+
+  // Get all classes
+  static Future<List<ClassModel>> getAllClasses() async {
+    try {
+      final prefs = await _instance;
+      final jsonString = prefs.getString(_keyClasses);
+      
+      if (jsonString == null || jsonString.isEmpty) {
+        return [];
+      }
+      
+      final jsonList = json.decode(jsonString) as List;
+      return jsonList.map((json) => ClassModel.fromJson(json)).toList();
+    } catch (e) {
+      print('Error loading classes: $e');
+      return [];
+    }
+  }
+
+  // Get a specific class by ID
+  static Future<ClassModel?> getClassById(String id) async {
+    try {
+      final classes = await getAllClasses();
+      return classes.firstWhere(
+        (c) => c.id == id,
+        orElse: () => ClassModel.empty(),
+      );
+    } catch (e) {
+      print('Error getting class by id: $e');
+      return null;
+    }
+  }
+
+  // Delete a class
+  static Future<bool> deleteClass(String id) async {
+    try {
+      final prefs = await _instance;
+      
+      // Get existing classes
+      final classes = await getAllClasses();
+      
+      // Remove the class with matching id
+      classes.removeWhere((c) => c.id == id);
+      
+      // Convert to JSON list
+      final jsonList = classes.map((c) => c.toJson()).toList();
+      final jsonString = json.encode(jsonList);
+      
+      return await prefs.setString(_keyClasses, jsonString);
+    } catch (e) {
+      print('Error deleting class: $e');
+      return false;
+    }
+  }
+
+  // Clear all classes
+  static Future<bool> clearAllClasses() async {
+    try {
+      final prefs = await _instance;
+      return await prefs.remove(_keyClasses);
+    } catch (e) {
+      print('Error clearing classes: $e');
+      return false;
+    }
+  }
+
+  // Check if classes exist
+  static Future<bool> hasClasses() async {
+    try {
+      final classes = await getAllClasses();
+      return classes.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Get classes by category
+  static Future<List<ClassModel>> getClassesByCategory(String category) async {
+    try {
+      final classes = await getAllClasses();
+      return classes.where((c) => c.category == category).toList();
+    } catch (e) {
+      print('Error getting classes by category: $e');
+      return [];
+    }
+  }
 
   // Save complete user profile
   static Future<bool> saveUserProfile(UserProfile profile) async {
@@ -129,3 +250,5 @@ class SharedPreferencesService {
     }
   }
 }
+
+
