@@ -1,8 +1,10 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
+
 import '../pages/home_page.dart';
 import '../pages/class_page.dart';
 import '../pages/account_menu_page.dart';
+import '../pages/todo_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -14,9 +16,13 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
+  final Color primaryColor = const Color(0xFF0EA781);
+  final Color inactiveColor = const Color(0xFF6C6F70);
+
   final _pages = const [
     HomePage(),
     ClassPage(),
+    TodoPage(),
     AccountMenuPage(),
   ];
 
@@ -32,6 +38,11 @@ class _MainNavigationState extends State<MainNavigation> {
       label: 'Kelas',
     ),
     NavigationDestination(
+      icon: Icon(Icons.task_outlined),
+      selectedIcon: Icon(Icons.task),
+      label: "ToDo",
+    ),
+    NavigationDestination(
       icon: Icon(Icons.person_outline),
       selectedIcon: Icon(Icons.person),
       label: 'Akun Saya',
@@ -40,42 +51,43 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF0EA781);
-    const inactiveColor = Color(0xFF6C6F70);
-
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeInOut,
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _pages,
-        ),
+      body: PageTransitionSwitcher(
+        duration: const Duration(milliseconds: 500),
+        transitionBuilder: (child, animation, secondaryAnimation) {
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.horizontal,
+            fillColor: Colors.white,
+            child: child,
+          );
+        },
+        child: _pages[_currentIndex],
       ),
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: Colors.white,
           indicatorColor: primaryColor.withOpacity(0.15),
-          iconTheme: WidgetStateProperty.resolveWith((states) =>
-              IconThemeData(
-                  color: states.contains(WidgetState.selected)
-                      ? primaryColor
-                      : inactiveColor)),
-          labelTextStyle: WidgetStateProperty.resolveWith((states) =>
-              TextStyle(
-                  color: states.contains(WidgetState.selected)
-                      ? primaryColor
-                      : inactiveColor,
-                  fontWeight: states.contains(WidgetState.selected)
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  fontSize: 13)),
+          iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                  ? primaryColor
+                  : inactiveColor)),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
+              color: states.contains(WidgetState.selected)
+                  ? primaryColor
+                  : inactiveColor,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              fontSize: 13)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
-          onDestinationSelected: (index) => setState(() => _currentIndex = index),
+          onDestinationSelected: (index) =>
+              setState(() => _currentIndex = index),
           destinations: _destinations,
-          animationDuration: const Duration(milliseconds: 300),
+          animationDuration: const Duration(milliseconds: 400),
         ),
       ),
     );
