@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import '../services/shared_preferences_service.dart';
+import '../services/api_service.dart';
 import '../models/class_model.dart';
 
 class AddClassPage extends StatefulWidget {
@@ -18,7 +16,10 @@ class _AddClassPageState extends State<AddClassPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
-  String _selectedCategory = 'Pilih Prakerja atau SPL';
+  final _thumbnailUrlController = TextEditingController();
+  final _ratingController = TextEditingController();
+  final _createdByController = TextEditingController();
+  String? _selectedCategory;
   String? _thumbnailPath;
   bool _isLoading = false;
 
@@ -27,33 +28,51 @@ class _AddClassPageState extends State<AddClassPage> {
     super.initState();
     if (widget.classModel != null) {
       _nameController.text = widget.classModel!.name;
-      _priceController.text = widget.classModel!.price.toStringAsFixed(0);
-      _selectedCategory = widget.classModel!.category;
+      
+      // Format price dengan titik sebagai separator ribuan
+      final priceInt = widget.classModel!.price.toInt();
+      _priceController.text = _formatNumber(priceInt);
+      
+      // Handle empty categoryTag
+      final category = widget.classModel!.category;
+      if (category.isNotEmpty && category != 'Prakerja' && category != 'SPL') {
+        _selectedCategory = _normalizeCategory(category);
+      } else if (category.isEmpty) {
+        _selectedCategory = null; // Biarkan null jika kosong
+      } else {
+        _selectedCategory = category;
+      }
+      
+      _thumbnailUrlController.text = widget.classModel!.thumbnail ?? '';
+      _ratingController.text = widget.classModel!.rating ?? '';
+      _createdByController.text = widget.classModel!.createdBy ?? '';
       _thumbnailPath = widget.classModel!.thumbnail;
     }
+  }
+
+  String _normalizeCategory(String category) {
+    final normalized = category.toLowerCase();
+    if (normalized == 'prakerja') return 'Prakerja';
+    if (normalized == 'spl') return 'SPL';
+    return 'Prakerja';
+  }
+
+  String _formatNumber(int number) {
+    if (number == 0) return '0';
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _thumbnailUrlController.dispose();
+    _ratingController.dispose();
+    _createdByController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1920,
-      maxHeight: 1080,
-      imageQuality: 85,
-    );
-
-    if (image != null) {
-      setState(() {
-        _thumbnailPath = image.path;
-      });
-    }
   }
 
   Future<void> _saveClass() async {
@@ -61,7 +80,7 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
-    if (_selectedCategory == 'Pilih Prakerja atau SPL') {
+    if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pilih kategori kelas terlebih dahulu'),
@@ -74,28 +93,104 @@ class _AddClassPageState extends State<AddClassPage> {
     setState(() => _isLoading = true);
 
     try {
-      final classModel = ClassModel(
-        id: widget.classModel?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text.trim(),
-        price: double.parse(_priceController.text.replaceAll('.', '')),
-        category: _selectedCategory,
-        thumbnail: _thumbnailPath,
-      );
+      // Parse price: remove dots, then parse
+      final priceValue = double.parse(_priceController.text.replaceAll('.', ''));
+      final priceString = priceValue.toStringAsFixed(2);
 
-      final success = await SharedPreferencesService.saveClass(classModel);
+      final thumbnailUrl = _thumbnailUrlController.text.trim().isNotEmpty 
+          ? _thumbnailUrlController.text.trim() 
+          : null;
 
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.classModel != null
-                  ? 'Kelas berhasil diperbarui'
-                  : 'Kelas berhasil ditambahkan',
+      final rating = _ratingController.text.trim().isNotEmpty 
+          ? _ratingController.text.trim() 
+          : null;
+
+      final createdBy = _createdByController.text.trim().isNotEmpty 
+          ? _createdByController.text.trim() 
+          : null;
+
+      Map<String, dynamic> result;
+
+      if (widget.classModel != null) {
+        // UPDATE - Bandingkan dengan data original
+        final hasNameChanged = _nameController.text.trim() != widget.classModel!.name;
+        
+        // Compare price: round to avoid floating point precision issues
+        final originalPrice = widget.classModel!.price.round();
+        final currentPrice = priceValue.round();
+        final hasPriceChanged = currentPrice != originalPrice;
+        
+        // Compare category: handle empty category
+        final originalCategory = widget.classModel!.category.toLowerCase();
+        final currentCategory = _selectedCategory?.toLowerCase() ?? '';
+        final hasCategoryChanged = currentCategory != originalCategory && currentCategory.isNotEmpty;
+        
+        final hasThumbnailChanged = thumbnailUrl != widget.classModel!.thumbnail;
+        final hasRatingChanged = rating != widget.classModel!.rating;
+
+        // Debug log
+        print('=== UPDATE COMPARISON ===');
+        print('Name: "${widget.classModel!.name}" → "${_nameController.text.trim()}" | Changed: $hasNameChanged');
+        print('Price: ${widget.classModel!.price} → $priceValue | Changed: $hasPriceChanged');
+        print('Category: "${widget.classModel!.category}" → "$_selectedCategory" | Changed: $hasCategoryChanged');
+        print('Thumbnail: "${widget.classModel!.thumbnail}" → "$thumbnailUrl" | Changed: $hasThumbnailChanged');
+        print('Rating: "${widget.classModel!.rating}" → "$rating" | Changed: $hasRatingChanged');
+
+        if (!hasNameChanged && !hasPriceChanged && !hasCategoryChanged && 
+            !hasThumbnailChanged && !hasRatingChanged) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tidak ada perubahan untuk disimpan'),
+              backgroundColor: Colors.orange,
             ),
-            backgroundColor: Colors.green,
-          ),
+          );
+          setState(() => _isLoading = false);
+          return;
+        }
+
+        // PENTING: Kirim semua data, bukan hanya yang berubah
+        // Karena API kemungkinan override semua field
+        result = await ApiService.updateCourse(
+          id: widget.classModel!.id,
+          name: _nameController.text.trim(),  // Always send
+          price: priceString,  // Always send
+          categoryTag: currentCategory.isNotEmpty ? [currentCategory] : null,
+          thumbnail: thumbnailUrl,  // Always send (bisa null)
+          rating: rating,  // Always send (bisa null)
         );
-        Navigator.pop(context, true);
+      } else {
+        // CREATE
+        result = await ApiService.createCourse(
+          name: _nameController.text.trim(),
+          price: priceString,
+          categoryTag: [_selectedCategory!.toLowerCase()],
+          thumbnail: thumbnailUrl,
+          rating: rating,
+          createdBy: createdBy,
+        );
+      }
+
+      if (mounted) {
+        if (result['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                widget.classModel != null
+                    ? 'Kelas berhasil diperbarui'
+                    : 'Kelas berhasil ditambahkan',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Terjadi kesalahan'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -199,7 +294,7 @@ class _AddClassPageState extends State<AddClassPage> {
               decoration: InputDecoration(
                 hintText: 'e.g 1.000.000',
                 hintStyle: TextStyle(color: Colors.grey[400]),
-                helperText: 'Masukkan dalam bentuk angka',
+                helperText: 'Masukkan dalam bentuk angka (tanpa koma)',
                 helperStyle: TextStyle(
                   color: Colors.grey[500],
                   fontSize: 12,
@@ -226,7 +321,7 @@ class _AddClassPageState extends State<AddClassPage> {
                   return 'Harga kelas tidak boleh kosong';
                 }
                 final price = double.tryParse(value.replaceAll('.', ''));
-                if (price == null || price <= 0) {
+                if (price == null || price < 0) {
                   return 'Masukkan harga yang valid';
                 }
                 return null;
@@ -264,11 +359,8 @@ class _AddClassPageState extends State<AddClassPage> {
                   vertical: 14,
                 ),
               ),
+              hint: const Text('Pilih Prakerja atau SPL'),
               items: const [
-                DropdownMenuItem(
-                  value: 'Pilih Prakerja atau SPL',
-                  child: Text('Pilih Prakerja atau SPL'),
-                ),
                 DropdownMenuItem(
                   value: 'Prakerja',
                   child: Text('Prakerja'),
@@ -280,76 +372,229 @@ class _AddClassPageState extends State<AddClassPage> {
               ],
               onChanged: (value) {
                 setState(() {
-                  _selectedCategory = value!;
+                  _selectedCategory = value;
                 });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Pilih kategori kelas';
+                }
+                return null;
               },
             ),
 
             const SizedBox(height: 24),
 
-            // Thumbnail Kelas
+            // URL Thumbnail Kelas
             const Text(
-              'Thumbnail Kelas',
+              'URL Thumbnail Kelas',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[50],
+            TextFormField(
+              controller: _thumbnailUrlController,
+              keyboardType: TextInputType.url,
+              decoration: InputDecoration(
+                hintText: 'https://example.com/image.jpg',
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                helperText: 'Masukkan URL gambar thumbnail (opsional)',
+                helperStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
                 ),
-                child: _thumbnailPath != null && _thumbnailPath!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: _thumbnailPath!.startsWith('http')
-                            ? Image.network(
-                                _thumbnailPath!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              )
-                            : Image.file(
-                                File(_thumbnailPath!),
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.photo_camera,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Upload Foto',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                prefixIcon: const Icon(Icons.link),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF2D6F5C)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
+              validator: (value) {
+                if (value != null && value.trim().isNotEmpty) {
+                  if (!value.startsWith('http://') && !value.startsWith('https://')) {
+                    return 'URL harus dimulai dengan http:// atau https://';
+                  }
+                }
+                return null;
+              },
+              onChanged: (value) {
+                if (value.startsWith('http')) {
+                  setState(() {
+                    _thumbnailPath = value;
+                  });
+                }
+              },
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
+
+            // Preview Thumbnail
+            if (_thumbnailPath != null && _thumbnailPath!.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Preview Thumbnail',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[50],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        _thumbnailPath!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.broken_image,
+                                  size: 48, color: Colors.grey[400]),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Gagal memuat gambar',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+            const SizedBox(height: 24),
+
+            // Rating
+            const Text(
+              'Rating (Opsional)',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _ratingController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: 'e.g 4.5',
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                helperText: 'Rating kelas dari 0.0 - 5.0',
+                helperStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                ),
+                prefixIcon: const Icon(Icons.star_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF2D6F5C)),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+              validator: (value) {
+                if (value != null && value.trim().isNotEmpty) {
+                  final rating = double.tryParse(value.trim());
+                  if (rating == null || rating < 0 || rating > 5) {
+                    return 'Rating harus antara 0.0 - 5.0';
+                  }
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // Created By (hanya untuk create)
+            if (widget.classModel == null) ...[
+              const Text(
+                'Dibuat Oleh (Opsional)',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _createdByController,
+                decoration: InputDecoration(
+                  hintText: 'e.g Admin, John Doe',
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  helperText: 'Nama pembuat kelas',
+                  helperStyle: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 12,
+                  ),
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF2D6F5C)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // Button Simpan Perubahan
             SizedBox(
@@ -373,7 +618,7 @@ class _AddClassPageState extends State<AddClassPage> {
                         ),
                       )
                     : Text(
-                        widget.classModel != null ? 'Simpan Perubahan' : 'Simpan Perubahan',
+                        widget.classModel != null ? 'Simpan Perubahan' : 'Tambah Kelas',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -431,16 +676,28 @@ class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
     }
 
     final formatted = _formatNumber(number);
+    
+    // Preserve cursor position
+    int offset = formatted.length;
+    if (newValue.selection.baseOffset < oldValue.text.length) {
+      // User is editing in the middle, try to maintain relative position
+      offset = newValue.selection.baseOffset;
+      final oldDots = '.'.allMatches(oldValue.text.substring(0, oldValue.selection.baseOffset)).length;
+      final newDots = '.'.allMatches(formatted.substring(0, offset.clamp(0, formatted.length))).length;
+      offset += (newDots - oldDots);
+    }
+    
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+      selection: TextSelection.collapsed(offset: offset.clamp(0, formatted.length)),
     );
   }
 
   String _formatNumber(int number) {
+    if (number == 0) return '0';
     return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
   }
 }

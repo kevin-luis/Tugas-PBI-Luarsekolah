@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_class_page.dart';
-import '../services/shared_preferences_service.dart';
+import '../services/api_service.dart';
 import '../models/class_model.dart';
 import 'dart:io';
 
@@ -14,29 +14,91 @@ class ClassPage extends StatefulWidget {
 class _ClassPageState extends State<ClassPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<ClassModel> _classes = [];
+  List<ClassModel> _allClasses = [];
+  List<ClassModel> _filteredClasses = [];
   bool _isLoading = true;
+  String _currentFilter = 'all';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_onTabChanged);
     _loadClasses();
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
 
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {
+        switch (_tabController.index) {
+          case 0:
+            _currentFilter = 'all';
+            _filteredClasses = _allClasses;
+            break;
+          case 1:
+            _currentFilter = 'spl';
+            _filteredClasses = _allClasses
+                .where((c) => c.category.toLowerCase() == 'spl')
+                .toList();
+            break;
+          case 2:
+            _currentFilter = 'prakerja';
+            _filteredClasses = _allClasses
+                .where((c) => c.category.toLowerCase() == 'prakerja')
+                .toList();
+            break;
+        }
+      });
+    }
+  }
+
   Future<void> _loadClasses() async {
     setState(() => _isLoading = true);
-    final classes = await SharedPreferencesService.getAllClasses();
-    setState(() {
-      _classes = classes;
-      _isLoading = false;
-    });
+    
+    try {
+      final classes = await ApiService.getAllCourses();
+      
+      setState(() {
+        _allClasses = classes;
+        _applyFilter();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memuat kelas: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _applyFilter() {
+    switch (_currentFilter) {
+      case 'all':
+        _filteredClasses = _allClasses;
+        break;
+      case 'spl':
+        _filteredClasses = _allClasses
+            .where((c) => c.category.toLowerCase() == 'spl')
+            .toList();
+        break;
+      case 'prakerja':
+        _filteredClasses = _allClasses
+            .where((c) => c.category.toLowerCase() == 'prakerja')
+            .toList();
+        break;
+    }
   }
 
   Future<void> _deleteClass(String id) async {
@@ -59,8 +121,36 @@ class _ClassPageState extends State<ClassPage>
     );
 
     if (confirmed == true) {
-      await SharedPreferencesService.deleteClass(id);
-      _loadClasses();
+      // Show loading
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Menghapus kelas...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      final result = await ApiService.deleteCourse(id);
+      
+      if (mounted) {
+        if (result['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Kelas berhasil dihapus'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadClasses();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Gagal menghapus kelas'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -108,9 +198,9 @@ class _ClassPageState extends State<ClassPage>
             fontWeight: FontWeight.normal,
           ),
           tabs: const [
-            Tab(text: 'Kelas Terpopuler'),
+            Tab(text: 'Semua Kelas'),
             Tab(text: 'Kelas SPL'),
-            Tab(text: 'Kelas Langganan'),
+            Tab(text: 'Prakerja'),
           ],
         ),
       ),
@@ -145,7 +235,7 @@ class _ClassPageState extends State<ClassPage>
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _classes.isEmpty
+                : _filteredClasses.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -160,16 +250,25 @@ class _ClassPageState extends State<ClassPage>
                                 color: Colors.grey[600],
                               ),
                             ),
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: _loadClasses,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Refresh'),
+                            ),
                           ],
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _classes.length,
-                        itemBuilder: (context, index) {
-                          final classItem = _classes[index];
-                          return _buildClassCard(classItem);
-                        },
+                    : RefreshIndicator(
+                        onRefresh: _loadClasses,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _filteredClasses.length,
+                          itemBuilder: (context, index) {
+                            final classItem = _filteredClasses[index];
+                            return _buildClassCard(classItem);
+                          },
+                        ),
                       ),
           ),
         ],
@@ -201,10 +300,18 @@ class _ClassPageState extends State<ClassPage>
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: classItem.thumbnail!.startsWith('http')
-                              ? Image.network(classItem.thumbnail!,
-                                  fit: BoxFit.cover)
-                              : Image.file(File(classItem.thumbnail!),
-                                  fit: BoxFit.cover),
+                              ? Image.network(
+                                  classItem.thumbnail!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultThumbnail(classItem),
+                                )
+                              : Image.file(
+                                  File(classItem.thumbnail!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultThumbnail(classItem),
+                                ),
                         )
                       : _buildDefaultThumbnail(classItem),
             ),
@@ -268,9 +375,25 @@ class _ClassPageState extends State<ClassPage>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildCategoryChip('Prakerja', Colors.blue),
-                      const SizedBox(width: 8),
-                      _buildCategoryChip('SPL', Colors.green),
+                      _buildCategoryChip(
+                        classItem.category,
+                        classItem.category.toLowerCase() == 'spl'
+                            ? Colors.green
+                            : Colors.blue,
+                      ),
+                      if (classItem.rating != null) ...[
+                        const SizedBox(width: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, size: 16, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              classItem.rating!,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 8),
