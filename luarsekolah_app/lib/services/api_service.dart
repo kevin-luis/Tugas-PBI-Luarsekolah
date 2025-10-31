@@ -7,7 +7,6 @@ class ApiService {
       baseUrl: 'https://ls-lms.zoidify.my.id/api',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_TOKEN_HERE',
       },
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),

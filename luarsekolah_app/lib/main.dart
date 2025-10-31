@@ -4,8 +4,11 @@ import 'pages/main_navigation.dart';
 import 'pages/login_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
+import 'controllers/class_controller.dart';
 
 void main() {
+  Get.put<ClassController>(ClassController(), permanent: true);
   runApp(const MainApp());
 }
 
@@ -14,7 +17,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Luarsekolah App',
       // Tambahkan ini untuk localization
       localizationsDelegates: const [
