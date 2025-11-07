@@ -1,11 +1,9 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
-import 'pages/register_page.dart';
-import 'pages/main_navigation.dart';
-import 'pages/login_page.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:get/get.dart';
-import 'controllers/class_controller.dart';
+import 'core/routes/app_pages.dart';
 
 void main() {
   Get.put<ClassController>(ClassController(), permanent: true);
@@ -19,35 +17,30 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Luarsekolah App',
-      // Tambahkan ini untuk localization
+      
+      // ✅ Gunakan GetX routing
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes,
+      
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
-      // Daftar bahasa yang didukung
       supportedLocales: const [
-        Locale('id', 'ID'), // Bahasa Indonesia
-        Locale('en', 'US'), // English
+        Locale('id', 'ID'),
+        Locale('en', 'US'),
       ],
-
-      // Set locale default ke Bahasa Indonesia
       locale: const Locale('id', 'ID'),
+      
       theme: ThemeData(
-        // textTheme: GoogleFonts.poppinsTextTheme(
-        //   Theme.of(context).textTheme,
-        // ),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF077E60)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF077E60),
+        ),
         useMaterial3: true,
         fontFamily: GoogleFonts.poppins().fontFamily,
       ),
-      initialRoute: '/main',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/main': (context) => const MainNavigation(),
-      },
+      
       debugShowCheckedModeBanner: false,
     );
   }

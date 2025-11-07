@@ -1,9 +1,13 @@
+// lib/pages/main_navigation.dart
+
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import '../pages/home_page.dart';
-import '../pages/class_page.dart';
+import '../features/course/presentation/pages/course_list_page.dart';
+import '../features/course/presentation/bindings/course_binding.dart';
+import '../features/todo/presentation/pages/todo_list_page.dart';
+import '../features/todo/presentation/bindings/todo_binding.dart';
 import '../pages/account_menu_page.dart';
-import '../pages/todo_page.dart';// ✅ Tambahkan import ini
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -18,10 +22,18 @@ class _MainNavigationState extends State<MainNavigation> {
   final Color primaryColor = const Color(0xFF0EA781);
   final Color inactiveColor = const Color(0xFF6C6F70);
 
+  @override
+  void initState() {
+    super.initState();
+    // Inject bindings for Course and Todo features
+    CourseBinding().dependencies();
+    TodoBinding().dependencies();
+  }
+
   final _pages = const [
     HomePage(),
-    ClassPage(),
-    TodoPage(),
+    CourseListPage(),
+    TodoListPage(),
     AccountMenuPage(),
   ];
 
@@ -39,7 +51,7 @@ class _MainNavigationState extends State<MainNavigation> {
     NavigationDestination(
       icon: Icon(Icons.task_outlined),
       selectedIcon: Icon(Icons.task),
-      label: "ToDo",
+      label: 'ToDo',
     ),
     NavigationDestination(
       icon: Icon(Icons.person_outline),
