@@ -40,7 +40,6 @@ class _TodoPageState extends State<TodoPage>
       case TodoFilter.completed:
         return _allTodos.where((todo) => todo.completed).toList();
       case TodoFilter.all:
-      default:
         return _allTodos;
     }
   }
@@ -211,6 +210,7 @@ class _TodoPageState extends State<TodoPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(

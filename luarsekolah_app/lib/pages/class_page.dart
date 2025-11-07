@@ -1,100 +1,26 @@
 import 'package:flutter/material.dart';
-import 'add_class_page.dart';
-import '../services/shared_preferences_service.dart';
+import 'package:get/get.dart';
+import '../controllers/class_controller.dart';
 import '../models/class_model.dart';
 import 'dart:io';
 
-class ClassPage extends StatefulWidget {
+class ClassPage extends StatelessWidget {
   const ClassPage({Key? key}) : super(key: key);
 
   @override
-  State<ClassPage> createState() => _ClassPageState();
-}
-
-class _ClassPageState extends State<ClassPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  List<ClassModel> _classes = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _loadClasses();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadClasses() async {
-    setState(() => _isLoading = true);
-    final classes = await SharedPreferencesService.getAllClasses();
-    setState(() {
-      _classes = classes;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _deleteClass(String id) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Kelas'),
-        content: const Text('Apakah Anda yakin ingin menghapus kelas ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await SharedPreferencesService.deleteClass(id);
-      _loadClasses();
-    }
-  }
-
-  Future<void> _navigateToAddClass() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddClassPage()),
-    );
-    if (result == true) {
-      _loadClasses();
-    }
-  }
-
-  Future<void> _navigateToEditClass(ClassModel classModel) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddClassPage(classModel: classModel),
-      ),
-    );
-    if (result == true) {
-      _loadClasses();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize controller hanya untuk page ini
+    final ClassController controller = Get.find<ClassController>();
+
+    print('🏗️ ClassPage build - Controller: ${controller.hashCode}');
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: TabBar(
-          controller: _tabController,
+          controller: controller.tabController,
           labelColor: const Color(0xFF2D6F5C),
           unselectedLabelColor: Colors.grey,
           indicatorColor: const Color(0xFF2D6F5C),
@@ -108,9 +34,9 @@ class _ClassPageState extends State<ClassPage>
             fontWeight: FontWeight.normal,
           ),
           tabs: const [
-            Tab(text: 'Kelas Terpopuler'),
+            Tab(text: 'Semua Kelas'),
             Tab(text: 'Kelas SPL'),
-            Tab(text: 'Kelas Langganan'),
+            Tab(text: 'Prakerja'),
           ],
         ),
       ),
@@ -122,7 +48,11 @@ class _ClassPageState extends State<ClassPage>
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _navigateToAddClass,
+                onPressed: () {
+                  print('🆕 Add Class button pressed');
+                  print('Controller hash before nav: ${controller.hashCode}');
+                  controller.navigateToAddClass();
+                },
                 icon: const Icon(Icons.add, color: Colors.white),
                 label: const Text(
                   'Tambah Kelas',
@@ -143,41 +73,56 @@ class _ClassPageState extends State<ClassPage>
             ),
           ),
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _classes.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.school_outlined,
-                                size: 80, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Belum ada kelas',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.filteredClasses.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.school_outlined,
+                          size: 80, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada kelas',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _classes.length,
-                        itemBuilder: (context, index) {
-                          final classItem = _classes[index];
-                          return _buildClassCard(classItem);
-                        },
                       ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: controller.loadClasses,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Refresh'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: controller.loadClasses,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: controller.filteredClasses.length,
+                  itemBuilder: (context, index) {
+                    final classItem = controller.filteredClasses[index];
+                    return _buildClassCard(classItem, controller);
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildClassCard(ClassModel classItem) {
+  Widget _buildClassCard(ClassModel classItem, ClassController controller) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
@@ -194,17 +139,25 @@ class _ClassPageState extends State<ClassPage>
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: _getCategoryColor(classItem.category),
+                color: controller.getCategoryColor(classItem.category),
               ),
               child:
                   classItem.thumbnail != null && classItem.thumbnail!.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: classItem.thumbnail!.startsWith('http')
-                              ? Image.network(classItem.thumbnail!,
-                                  fit: BoxFit.cover)
-                              : Image.file(File(classItem.thumbnail!),
-                                  fit: BoxFit.cover),
+                              ? Image.network(
+                                  classItem.thumbnail!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultThumbnail(classItem),
+                                )
+                              : Image.file(
+                                  File(classItem.thumbnail!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildDefaultThumbnail(classItem),
+                                ),
                         )
                       : _buildDefaultThumbnail(classItem),
             ),
@@ -257,9 +210,9 @@ class _ClassPageState extends State<ClassPage>
                         ],
                         onSelected: (value) {
                           if (value == 'edit') {
-                            _navigateToEditClass(classItem);
+                            controller.navigateToEditClass(classItem);
                           } else if (value == 'delete') {
-                            _deleteClass(classItem.id);
+                            controller.deleteClass(classItem.id);
                           }
                         },
                       ),
@@ -268,14 +221,31 @@ class _ClassPageState extends State<ClassPage>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      _buildCategoryChip('Prakerja', Colors.blue),
-                      const SizedBox(width: 8),
-                      _buildCategoryChip('SPL', Colors.green),
+                      _buildCategoryChip(
+                        classItem.category,
+                        classItem.category.toLowerCase() == 'spl'
+                            ? Colors.green
+                            : Colors.blue,
+                      ),
+                      if (classItem.rating != null) ...[
+                        const SizedBox(width: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.star,
+                                size: 16, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              classItem.rating!,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Rp ${_formatPrice(classItem.price)}',
+                    'Rp ${controller.formatPrice(classItem.price)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -330,23 +300,5 @@ class _ClassPageState extends State<ClassPage>
         ),
       ),
     );
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'prakerja':
-        return const Color(0xFF2D6F5C);
-      case 'spl':
-        return const Color(0xFFD4A855);
-      default:
-        return const Color(0xFF2D6F5C);
-    }
-  }
-
-  String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
   }
 }

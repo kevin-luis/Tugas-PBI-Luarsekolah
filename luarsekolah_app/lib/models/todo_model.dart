@@ -33,17 +33,17 @@ class TodoModel {
     if (dateValue == null) {
       return DateTime.now();
     }
-    
+
     try {
       if (dateValue is DateTime) {
         return dateValue;
       }
-      
+
       if (dateValue is String) {
         // Handle ISO 8601 format with .000Z
         return DateTime.parse(dateValue);
       }
-      
+
       return DateTime.now();
     } catch (e) {
       print('[TodoModel] Error parsing date: $dateValue, error: $e');

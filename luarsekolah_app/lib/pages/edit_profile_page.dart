@@ -48,7 +48,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     try {
       final profile = await SharedPreferencesService.getUserProfile();
       setState(() {
-        _nameController.text = "Michael Emanthraut";
+        _nameController.text = "Michael Ehrmantraut";
         _birthDate = profile.birthDate;
         _selectedGender = profile.gender;
         _selectedJobStatus = profile.jobStatus;
