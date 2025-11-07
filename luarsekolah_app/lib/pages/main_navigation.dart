@@ -59,7 +59,6 @@ class _MainNavigationState extends State<MainNavigation> {
       label: 'Akun Saya',
     ),
   ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

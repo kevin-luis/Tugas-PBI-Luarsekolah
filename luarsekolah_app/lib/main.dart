@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/routes/app_pages.dart';
 
 void main() {
+  Get.put<ClassController>(ClassController(), permanent: true);
   runApp(const MainApp());
 }
 
