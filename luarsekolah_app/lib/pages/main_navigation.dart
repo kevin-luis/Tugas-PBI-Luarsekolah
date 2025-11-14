@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:luarsekolah_app/features/todo/presentation/bindings/todo_firebase_binding.dart';
 import '../pages/home_page.dart';
 import '../features/course/presentation/pages/course_list_page.dart';
 import '../features/course/presentation/bindings/course_binding.dart';
 import '../features/todo/presentation/pages/todo_list_page.dart';
-import '../features/todo/presentation/bindings/todo_binding.dart';
 import '../pages/account_menu_page.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -27,7 +27,7 @@ class _MainNavigationState extends State<MainNavigation> {
     super.initState();
     // Inject bindings for Course and Todo features
     CourseBinding().dependencies();
-    TodoBinding().dependencies();
+    TodoFirebaseBinding().dependencies();
   }
 
   final _pages = const [

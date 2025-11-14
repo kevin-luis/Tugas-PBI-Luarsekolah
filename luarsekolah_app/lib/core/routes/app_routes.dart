@@ -3,8 +3,11 @@
 class AppRoutes {
   AppRoutes._();
   
+  // Auth routes
   static const String login = '/login';
   static const String register = '/register';
+  
+  // Main
   static const String main = '/main';
   
   // Course routes
