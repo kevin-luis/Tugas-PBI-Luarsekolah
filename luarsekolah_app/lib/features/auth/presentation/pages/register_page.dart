@@ -1,115 +1,73 @@
 import 'package:flutter/material.dart';
-import '../widgets/widgets.dart';
-import 'main_navigation.dart';
-import 'login_page.dart';
+import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
+import '../widgets/auth_widgets.dart';
+import '../../../../core/routes/app_routes.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends GetView<AuthController> {
   const RegisterPage({Key? key}) : super(key: key);
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<RegisterPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _namaController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _whatsappController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool _isNamaValid = false;
-  bool _isEmailValid = false;
-  bool _isPhoneValid = false;
-  bool _isPasswordValid = false;
-  bool _isNotRobot = false;
-  bool _isFormValid = false;
-  bool _isLoading = false;
-
-  void _checkForm() {
-    final valid = _isNamaValid &&
-        _isEmailValid &&
-        _isPhoneValid &&
-        _isPasswordValid &&
-        _isNotRobot;
-    if (valid != _isFormValid) {
-      setState(() => _isFormValid = valid);
-    }
-  }
-
-  @override
-  void dispose() {
-    _namaController.dispose();
-    _emailController.dispose();
-    _whatsappController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleRegister() async {
-    if (_formKey.currentState!.validate() && _isNotRobot) {
-      setState(() => _isLoading = true);
-
-      await Future.delayed(const Duration(seconds: 2));
-
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 900),
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const MainNavigation(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final slide = Tween(begin: const Offset(0.5, 0), end: Offset.zero)
-                .animate(CurvedAnimation(
-                    parent: animation, curve: Curves.easeOutExpo));
-            final fade = Tween(begin: 0.0, end: 1.0).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeInOut));
-            return SlideTransition(
-              position: slide,
-              child: FadeTransition(
-                opacity: fade,
-                child: child,
-              ),
-            );
-          },
-        ),
-        (Route<dynamic> route) => false,
-      );
-
-      setState(() => _isLoading = false);
-    }
-  }
-
-  void _handleGoogleSignIn() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Mendaftar dengan Google...')),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
+    final namaController = TextEditingController();
+    final emailController = TextEditingController();
+    final whatsappController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    final RxBool isNamaValid = false.obs;
+    final RxBool isEmailValid = false.obs;
+    final RxBool isPhoneValid = false.obs;
+    final RxBool isPasswordValid = false.obs;
+    final RxBool isNotRobot = false.obs;
+
+    Future<void> handleRegister() async {
+      if (formKey.currentState!.validate() && isNotRobot.value) {
+        final success = await controller.register(
+          name: namaController.text.trim(),
+          email: emailController.text.trim(),
+          phoneNumber: whatsappController.text.trim(),
+          password: passwordController.text,
+        );
+
+        if (success) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          Get.offAllNamed(AppRoutes.login);
+        }
+      }
+    }
+
+    Future<void> handleGoogleSignIn() async {
+      final success = await controller.loginWithGoogle();
+      if (success) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAllNamed(AppRoutes.main);
+      }
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const LogoImage(),
                 const SizedBox(height: 24),
                 const MainTitle(
-                    title: 'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah'),
+                  title: 'Daftarkan Akun Untuk Lanjut Akses ke Luarsekolah',
+                ),
                 const SizedBox(height: 24),
-                GoogleSignInButton(onPressed: _handleGoogleSignIn),
+                GoogleSignInButton(onPressed: handleGoogleSignIn),
                 const SizedBox(height: 16),
                 const DividerWithText(text: 'atau gunakan email'),
                 const SizedBox(height: 24),
                 DynamicTextField(
                   label: 'Nama Lengkap',
-                  controller: _namaController,
+                  controller: namaController,
                   type: FieldType.generic,
                   hintText: 'Masukkan nama lengkap',
                   rules: [
@@ -126,15 +84,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       validate: (s) => s.trim().split(' ').length >= 2,
                     ),
                   ],
-                  onValidationChanged: (v) {
-                    _isNamaValid = v;
-                    _checkForm();
-                  },
+                  onValidationChanged: (v) => isNamaValid.value = v,
                 ),
                 const SizedBox(height: 16),
                 DynamicTextField(
                   label: 'Email',
-                  controller: _emailController,
+                  controller: emailController,
                   type: FieldType.email,
                   hintText: 'nama@domain.com',
                   rules: [
@@ -145,15 +100,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               .hasMatch(s),
                     ),
                   ],
-                  onValidationChanged: (v) {
-                    _isEmailValid = v;
-                    _checkForm();
-                  },
+                  onValidationChanged: (v) => isEmailValid.value = v,
                 ),
                 const SizedBox(height: 16),
                 DynamicTextField(
                   label: 'Nomor HP',
-                  controller: _whatsappController,
+                  controller: whatsappController,
                   type: FieldType.phone,
                   hintText: '62xxxxxxxxxx',
                   rules: [
@@ -166,15 +118,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       validate: (s) => s.length >= 10,
                     ),
                   ],
-                  onValidationChanged: (v) {
-                    _isPhoneValid = v;
-                    _checkForm();
-                  },
+                  onValidationChanged: (v) => isPhoneValid.value = v,
                 ),
                 const SizedBox(height: 16),
                 DynamicTextField(
                   label: 'Password',
-                  controller: _passwordController,
+                  controller: passwordController,
                   type: FieldType.password,
                   hintText: 'Masukkan password Anda',
                   rules: [
@@ -196,35 +145,34 @@ class _RegisterPageState extends State<RegisterPage> {
                           RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(s),
                     ),
                   ],
-                  onValidationChanged: (v) {
-                    _isPasswordValid = v;
-                    _checkForm();
-                  },
+                  onValidationChanged: (v) => isPasswordValid.value = v,
                 ),
                 const SizedBox(height: 16),
-                RecaptchaBox(
-                  value: _isNotRobot,
-                  onChanged: (v) {
-                    setState(() {
-                      _isNotRobot = v;
-                    });
-                    _checkForm();
-                  },
-                ),
+                Obx(() => RecaptchaBox(
+                      value: isNotRobot.value,
+                      onChanged: (v) => isNotRobot.value = v,
+                    )),
                 const SizedBox(height: 24),
-                PrimaryButton(
-                  label: 'Daftarkan Akun',
-                  loadingText: 'Mendaftarkan Akunmu...',
-                  enabled: _isFormValid,
-                  onPressed: _handleRegister,
-                ),
+                Obx(() {
+                  final isFormValid = isNamaValid.value &&
+                      isEmailValid.value &&
+                      isPhoneValid.value &&
+                      isPasswordValid.value &&
+                      isNotRobot.value;
+                  return PrimaryButton(
+                    label: 'Daftarkan Akun',
+                    loadingText: 'Mendaftarkan Akunmu...',
+                    enabled: isFormValid && !controller.isLoading.value,
+                    onPressed: handleRegister,
+                  );
+                }),
                 const SizedBox(height: 16),
                 const TermsText(),
                 const SizedBox(height: 16),
-                const LoginInfoBox(
+                LoginInfoBox(
                   questionText: 'Sudah punya akun?',
                   actionText: 'Masuk ke akunmu',
-                  navigateTo: LoginPage(),
+                  onTap: () => Get.toNamed(AppRoutes.login),
                 ),
               ],
             ),

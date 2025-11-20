@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'edit_profile_page.dart';
-import 'login_page.dart';
+import '../features/auth/presentation/pages/login_page.dart';
 import '../services/shared_preferences_service.dart';
 
 class AccountMenuPage extends StatelessWidget {
