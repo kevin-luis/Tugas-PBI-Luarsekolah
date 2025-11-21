@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore Firebase config files
+lib/firebase_option.dart
+firebase.json
+
+.vscode/

@@ -88,4 +88,20 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(AuthFailure('Gagal mendapatkan user'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateUserProfile({
+    required String userId,
+    required String name,
+    String? phoneNumber,
+  }) async {
+    try {
+      await remoteDataSource.updateUserProfile(userId, name);
+      return const Right(null);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(AuthFailure('Gagal mengupdate profil'));
+    }
+  }
 }

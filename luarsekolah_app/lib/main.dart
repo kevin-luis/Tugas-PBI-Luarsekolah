@@ -6,13 +6,19 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/routes/app_pages.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'core/services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
-  // Get.put<ClassController>(ClassController(), permanent: true);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
   runApp(const MainApp());
 }
 
@@ -24,7 +30,7 @@ class MainApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Luarsekolah App',
       
-      // ✅ Gunakan GetX routing
+      // ✅ Initial route akan ditentukan di SplashScreen
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       
