@@ -7,6 +7,7 @@ import '../../domain/usecases/create_todo_use_case.dart';
 import '../../domain/usecases/update_todo_use_case.dart';
 import '../../domain/usecases/toggle_todo_use_case.dart';
 import '../../domain/usecases/delete_todo_use_case.dart';
+import '../../../../core/services/notification_service.dart';
 
 enum TodoFilter { all, active, completed }
 
@@ -16,6 +17,7 @@ class TodoController extends GetxController {
   final UpdateTodoUseCase updateTodoUseCase;
   final ToggleTodoUseCase toggleTodoUseCase;
   final DeleteTodoUseCase deleteTodoUseCase;
+  final NotificationService notificationService;
 
   TodoController({
     required this.getTodosUseCase,
@@ -23,6 +25,7 @@ class TodoController extends GetxController {
     required this.updateTodoUseCase,
     required this.toggleTodoUseCase,
     required this.deleteTodoUseCase,
+    required this.notificationService,
   });
 
   final _allTodos = <TodoEntity>[].obs;
@@ -93,12 +96,21 @@ class TodoController extends GetxController {
       // Add new todo to list (at beginning)
       _allTodos.insert(0, todo);
 
+      // âœ… Send notification when todo is created
+      await notificationService.showLocalNotification(
+        title: todo.text,
+        body: 'Todo berhasil ditambahkan',
+        payload: todo.id,
+      );
+
       Get.snackbar(
         'Sukses',
-        '✓ Todo berhasil dibuat!',
+        'Todo berhasil dibuat!',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
+
+      print('[TodoController] âœ… Todo created and notification sent');
     } catch (e) {
       print('[TodoController] Error creating todo: $e');
       
@@ -130,7 +142,7 @@ class TodoController extends GetxController {
 
       Get.snackbar(
         'Sukses',
-        '✓ Todo berhasil diupdate!',
+        'Todo berhasil diupdate!',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
@@ -158,8 +170,8 @@ class TodoController extends GetxController {
       Get.snackbar(
         'Sukses',
         updatedTodo.completed
-            ? '✓ Todo ditandai selesai'
-            : '○ Todo ditandai belum selesai',
+            ? 'Todo ditandai selesai'
+            : 'Todo ditandai belum selesai',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 1),
       );
@@ -195,6 +207,54 @@ class TodoController extends GetxController {
         'Gagal menghapus: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
       );
+    }
+  }
+
+  /// NEW: Schedule reminder for a todo (10 seconds delay for testing)
+  Future<void> remindTodo(TodoEntity todo) async {
+    try {
+      await notificationService.scheduleNotification(
+        title: 'Reminder: ${todo.text}',
+        body: 'Jangan lupa selesaikan todo ini!',
+        delay: const Duration(seconds: 10),
+        payload: todo.id,
+      );
+
+      Get.snackbar(
+        'Reminder Dijadwalkan',
+        'Kamu akan diingatkan dalam 10 detik',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        // icon: const Icon(Icons.alarm, color: Colors.white),
+        // backgroundColor: Colors.orange,
+        // colorText: Colo,
+      );
+
+      print('[TodoController] âœ… Reminder scheduled for: ${todo.text}');
+    } catch (e) {
+      print('[TodoController] Error scheduling reminder: $e');
+      
+      Get.snackbar(
+        'Error',
+        'Gagal menjadwalkan reminder: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  /// âœ… NEW: Cancel all reminders
+  Future<void> cancelAllReminders() async {
+    try {
+      await notificationService.cancelAllScheduledNotifications();
+      
+      Get.snackbar(
+        'Sukses',
+        'Semua reminder dibatalkan',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      print('[TodoController] Error cancelling reminders: $e');
     }
   }
 }

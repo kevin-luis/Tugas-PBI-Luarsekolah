@@ -6,6 +6,7 @@ import '../../domain/usecases/register_use_case.dart';
 import '../../domain/usecases/login_with_google_use_case.dart';
 import '../../domain/usecases/logout_use_case.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
+import '../../domain/usecases/update_user_profile_use_case.dart'; // Tambahkan ini
 import '../../../../core/error/failures.dart';
 
 class AuthController extends GetxController {
@@ -14,6 +15,7 @@ class AuthController extends GetxController {
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final UpdateUserProfileUseCase updateUserProfileUseCase; // Tambahkan ini
 
   AuthController({
     required this.loginUseCase,
@@ -21,6 +23,7 @@ class AuthController extends GetxController {
     required this.loginWithGoogleUseCase,
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
+    required this.updateUserProfileUseCase, // Tambahkan ini
   });
 
   final Rx<UserEntity?> currentUser = Rx<UserEntity?>(null);
@@ -191,6 +194,35 @@ class AuthController extends GetxController {
           colorText: Colors.green.shade900,
           duration: const Duration(seconds: 2),
         );
+      },
+    );
+  }
+
+  // Tambahkan method ini
+  Future<bool> updateProfile({
+    required String name,
+  }) async {
+    if (currentUser.value == null) return false;
+
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    final result = await updateUserProfileUseCase(
+      userId: currentUser.value!.id,
+      name: name,
+    );
+
+    return result.fold(
+      (failure) {
+        isLoading.value = false;
+        errorMessage.value = _mapFailureToMessage(failure);
+        return false;
+      },
+      (_) async {
+        isLoading.value = false;
+        // Refresh current user data
+        await checkCurrentUser();
+        return true;
       },
     );
   }

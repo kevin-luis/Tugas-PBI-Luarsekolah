@@ -20,4 +20,10 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> logout();
 
   Future<Either<Failure, UserEntity?>> getCurrentUser();
+  
+  Future<Either<Failure, void>> updateUserProfile({
+    required String userId,
+    required String name,
+    String? phoneNumber,
+  }); // Tambahkan ini
 }

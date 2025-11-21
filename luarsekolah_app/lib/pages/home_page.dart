@@ -1,9 +1,9 @@
-import 'dart:io';
+// lib/pages/home_page.dart
 import 'package:flutter/material.dart';
-import '../models/user_profile.dart';
-import '../services/shared_preferences_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:lottie/lottie.dart';
+import 'package:get/get.dart';
+import '../features/auth/presentation/controllers/auth_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,15 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentBannerIndex = 0;
   final PageController _bannerController = PageController();
-
-  // Future untuk load profile - PENTING: buat sebagai variable, jangan panggil langsung di FutureBuilder
-  late Future<UserProfile> _profileFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileFuture = SharedPreferencesService.getUserProfile();
-  }
+  final AuthController _authController = Get.find<AuthController>();
 
   @override
   void dispose() {
@@ -32,133 +24,117 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _refreshPage() async {
-    setState(() {
-      _profileFuture = SharedPreferencesService.getUserProfile();
-    });
-    // kalau kamu mau ambil data API, taruh di sini juga
-    await Future.delayed(const Duration(seconds: 2));
+    await _authController.checkCurrentUser();
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<UserProfile>(
-      future: _profileFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            backgroundColor: const Color(0xFF26A69A),
-            body: Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
-          );
-        }
+    return Obx(() {
+      final user = _authController.currentUser.value;
+      final displayName = user?.name ?? 'Pengguna';
 
-        final userProfile = snapshot.data ?? UserProfile.empty();
+      return Scaffold(
+        backgroundColor: const Color(0xFF26A69A),
+        body: RefreshIndicator(
+          onRefresh: _refreshPage,
+          color: const Color(0xFF26A69A),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              CupertinoSliverRefreshControl(
+                onRefresh: _refreshPage,
+                builder: (context, refreshState, pulledExtent,
+                    triggerPullDistance, indicatorExtent) {
+                  final bool refreshing =
+                      refreshState == RefreshIndicatorMode.refresh ||
+                          refreshState == RefreshIndicatorMode.done;
+                  final double opacity =
+                      (pulledExtent / triggerPullDistance).clamp(0.0, 1.0);
 
-        return Scaffold(
-            backgroundColor: const Color(0xFF26A69A),
-            body: RefreshIndicator(
-              onRefresh: _refreshPage,
-              color: const Color(0xFF26A69A),
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: _refreshPage,
-                    builder: (context, refreshState, pulledExtent,
-                        triggerPullDistance, indicatorExtent) {
-                      final bool refreshing =
-                          refreshState == RefreshIndicatorMode.refresh ||
-                              refreshState == RefreshIndicatorMode.done;
-                      final double opacity =
-                          (pulledExtent / triggerPullDistance).clamp(0.0, 1.0);
-
-                      return SizedBox(
-                        height: pulledExtent,
-                        child: Center(
-                          child: Opacity(
-                            opacity: opacity,
-                            child: SizedBox(
-                              height: 80,
-                              child: Lottie.asset(
-                                'assets/lottie/sandy_loading.json',
-                                animate: refreshing,
-                                repeat: true,
-                              ),
-                            ),
+                  return SizedBox(
+                    height: pulledExtent,
+                    child: Center(
+                      child: Opacity(
+                        opacity: opacity,
+                        child: SizedBox(
+                          height: 80,
+                          child: Lottie.asset(
+                            'assets/lottie/sandy_loading.json',
+                            animate: refreshing,
+                            repeat: true,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  // SliverAppBar dengan profile
-                  SliverAppBar(
-                    expandedHeight: 120.0,
-                    floating: false,
-                    pinned: false,
-                    backgroundColor: const Color(0xFF26A69A),
-                    elevation: 0,
-                    flexibleSpace: LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        final double progress =
-                            ((constraints.maxHeight - kToolbarHeight) /
-                                    (120.0 - kToolbarHeight))
-                                .clamp(0.0, 1.0);
-
-                        return FlexibleSpaceBar(
-                          titlePadding: EdgeInsets.zero,
-                          background: Container(
-                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                            child: SafeArea(
-                              child: _buildHeaderWithProfile(
-                                  progress, userProfile),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  // Rest of your content...
-                  SliverToBoxAdapter(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          _buildBannerCarousel(),
-                          const SizedBox(height: 24),
-                          _buildProgramSection(),
-                          const SizedBox(height: 16),
-                          _buildVoucherSection(),
-                          const SizedBox(height: 24),
-                          _buildPopularClassesSection(),
-                          const SizedBox(height: 24),
-                          _buildSubscriptionsSection(),
-                          const SizedBox(height: 24),
-                        ],
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ));
-      },
-    );
+
+              // SliverAppBar dengan profile
+              SliverAppBar(
+                expandedHeight: 120.0,
+                floating: false,
+                pinned: false,
+                backgroundColor: const Color(0xFF26A69A),
+                elevation: 0,
+                flexibleSpace: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    final double progress =
+                        ((constraints.maxHeight - kToolbarHeight) /
+                                (120.0 - kToolbarHeight))
+                            .clamp(0.0, 1.0);
+
+                    return FlexibleSpaceBar(
+                      titlePadding: EdgeInsets.zero,
+                      background: Container(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                        child: SafeArea(
+                          child: _buildHeaderWithProfile(progress, displayName),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Rest of your content...
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      _buildBannerCarousel(),
+                      const SizedBox(height: 24),
+                      _buildProgramSection(),
+                      const SizedBox(height: 16),
+                      _buildVoucherSection(),
+                      const SizedBox(height: 24),
+                      _buildPopularClassesSection(),
+                      const SizedBox(height: 24),
+                      _buildSubscriptionsSection(),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   // ========== HEADER WIDGET WITH ANIMATION ==========
-  Widget _buildHeaderWithProfile(double progress, UserProfile profile) {
+  Widget _buildHeaderWithProfile(double progress, String displayName) {
     final double opacity = progress.clamp(0.0, 1.0);
-    final String displayName =
-        profile.fullName.isNotEmpty ? profile.fullName : 'Pengguna';
 
     return Opacity(
       opacity: opacity,
@@ -176,17 +152,16 @@ class _HomePageState extends State<HomePage> {
                   shape: BoxShape.circle,
                 ),
                 child: ClipOval(
-                  child: profile.profileImage != null &&
-                          profile.profileImage!.isNotEmpty
-                      ? Image.file(
-                          File(profile.profileImage!),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.person,
-                                color: Colors.grey[600], size: 28);
-                          },
-                        )
-                      : Icon(Icons.person, color: Colors.grey[600], size: 28),
+                  child: Center(
+                    child: Text(
+                      displayName[0].toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF26A69A),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -238,7 +213,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ========== BANNER CAROUSEL ==========
+  // ... sisa kode tetap sama (banner, program, voucher, dll)
+
   Widget _buildBannerCarousel() {
     return Column(
       children: [
@@ -253,17 +229,15 @@ class _HomePageState extends State<HomePage> {
             },
             children: [
               _buildNetworkBannerItem(
-                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F68-686e3078ac119.jpeg&w=1080&q=75'),
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F77-68f5e55990cc2.jpeg&w=1920&q=75'),
               _buildNetworkBannerItem(
-                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F74-686e30fc501f5.jpeg&w=1080&q=75'),
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F78-68f5e5b59002b.png&w=1920&q=75'),
               _buildNetworkBannerItem(
-                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F76-68ad40156c2c4.png&w=1080&q=75'),
+                  'https://www.luarsekolah.com/_next/image?url=https%3A%2F%2Ffile.luarsekolah.com%2Fstorage%2Flive%2Fslider%2F79-691e979e716bf.png&w=1920&q=75'),
             ],
           ),
         ),
         const SizedBox(height: 12),
-
-        // Indicator Dots
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -333,7 +307,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ========== PROGRAM SECTION ==========
   Widget _buildProgramSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -391,7 +364,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ========== VOUCHER SECTION ==========
   Widget _buildVoucherSection() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -479,7 +451,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ========== POPULAR CLASSES SECTION ==========
   Widget _buildPopularClassesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,7 +633,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ========== SUBSCRIPTIONS SECTION ==========
   Widget _buildSubscriptionsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -762,7 +732,6 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner Section
           Container(
             height: 130,
             decoration: BoxDecoration(
@@ -776,7 +745,6 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Stack(
               children: [
-                // Decorative circles
                 Positioned(
                   right: -20,
                   top: -20,
@@ -801,7 +769,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                // Icon
                 Center(
                   child: Container(
                     width: 70,
@@ -820,7 +787,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          // Content Section
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

@@ -1,5 +1,9 @@
+// lib/features/todo/presentation/widgets/todo_card.dart
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../domain/entities/todo_entity.dart';
+import '../controllers/todo_controller.dart';
 
 class TodoCard extends StatelessWidget {
   final TodoEntity todo;
@@ -15,6 +19,10 @@ class TodoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localCreatedAt = todo.createdAt.toLocal();
+    final bool isOldTask = !todo.completed &&
+        DateTime.now().difference(localCreatedAt).inDays >= 7;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -23,7 +31,9 @@ class TodoCard extends StatelessWidget {
         side: BorderSide(
           color: todo.completed
               ? const Color(0xFF26A69A).withOpacity(0.3)
-              : Colors.transparent,
+              : isOldTask
+                  ? Colors.orange.withOpacity(0.4)
+                  : Colors.transparent,
           width: 2,
         ),
       ),
@@ -81,6 +91,8 @@ class TodoCard extends StatelessWidget {
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -119,11 +131,51 @@ class TodoCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                        // ⚠️ Warning badge for old uncompleted tasks
+                        if (isOldTask) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange[50],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 10,
+                                  color: Colors.orange[700],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Lama',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],
                 ),
               ),
+
+              // ✅ Reminder Button (only for uncompleted todos)
+              if (!todo.completed) ...[
+                const SizedBox(width: 8),
+                _buildReminderButton(context),
+                const SizedBox(width: 8),
+              ],
 
               // Arrow Icon
               Icon(
@@ -132,6 +184,37 @@ class TodoCard extends StatelessWidget {
                 color: Colors.grey[400],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ✅ Reminder Button Widget
+  Widget _buildReminderButton(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // Get controller and call remindTodo
+          final controller = Get.find<TodoController>();
+          controller.remindTodo(todo);
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.orange[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.orange[200]!,
+              width: 1,
+            ),
+          ),
+          child: Icon(
+            Icons.notifications_active,
+            color: Colors.orange[700],
+            size: 18,
           ),
         ),
       ),

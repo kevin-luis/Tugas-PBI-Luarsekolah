@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import '../../../../core/error/exceptions.dart';
 
@@ -8,12 +9,20 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithGoogle();
   Future<void> logout();
   Future<UserModel?> getCurrentUser();
+  Future<void> updateUserProfile(String userId, String name);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firestore;
 
-  AuthRemoteDataSourceImpl({required this.firebaseAuth});
+  // PENTING: Nama collection untuk user data
+  static const String _usersCollection = 'users'; // <-- Pastikan ini 'users'
+
+  AuthRemoteDataSourceImpl({
+    required this.firebaseAuth,
+    required this.firestore,
+  });
 
   @override
   Future<UserModel> login(String email, String password) async {
@@ -28,6 +37,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw AuthException('Login gagal');
       }
 
+      // Ambil data lengkap dari Firestore collection 'users'
+      final userDoc = await firestore
+          .collection(_usersCollection) // <-- Menggunakan 'users'
+          .doc(user.uid)
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        return UserModel(
+          id: user.uid,
+          name: userData['name'] ?? user.displayName ?? 'User',
+          email: user.email ?? email,
+          phoneNumber: userData['phoneNumber'],
+          createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? 
+                     user.metadata.creationTime ?? 
+                     DateTime.now(),
+        );
+      }
+
+      // Fallback jika data Firestore tidak ada
       return UserModel(
         id: user.uid,
         name: user.displayName ?? 'User',
@@ -60,17 +89,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw AuthException('Registrasi gagal');
       }
 
-      // Update display name
+      // Update display name di Firebase Auth
       await user.updateDisplayName(name);
       await user.reload();
 
-      return UserModel(
+      final userModel = UserModel(
         id: user.uid,
         name: name,
         email: email,
         phoneNumber: phoneNumber,
         createdAt: DateTime.now(),
       );
+
+      // Simpan ke Firestore collection 'users' dengan document ID = user.uid
+      await firestore
+          .collection(_usersCollection) // <-- Menggunakan 'users'
+          .doc(user.uid) // <-- Document ID sama dengan Firebase Auth UID
+          .set({
+            'name': name,
+            'email': email,
+            'phoneNumber': phoneNumber,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+      return userModel;
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
     } catch (e) {
@@ -99,6 +142,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final user = firebaseAuth.currentUser;
       if (user == null) return null;
 
+      // Ambil data lengkap dari Firestore collection 'users'
+      final userDoc = await firestore
+          .collection(_usersCollection) // <-- Menggunakan 'users'
+          .doc(user.uid)
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        return UserModel(
+          id: user.uid,
+          name: userData['name'] ?? user.displayName ?? 'User',
+          email: user.email ?? '',
+          phoneNumber: userData['phoneNumber'],
+          createdAt: (userData['createdAt'] as Timestamp?)?.toDate() ?? 
+                     user.metadata.creationTime ?? 
+                     DateTime.now(),
+        );
+      }
+
+      // Fallback jika data Firestore tidak ada
       return UserModel(
         id: user.uid,
         name: user.displayName ?? 'User',
@@ -108,6 +171,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } catch (e) {
       throw AuthException('Gagal mendapatkan user');
+    }
+  }
+
+  @override
+  Future<void> updateUserProfile(String userId, String name) async {
+    try {
+      await firestore
+          .collection(_usersCollection) // <-- Menggunakan 'users'
+          .doc(userId)
+          .update({
+            'name': name,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      throw AuthException('Gagal mengupdate profil: ${e.toString()}');
     }
   }
 

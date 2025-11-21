@@ -32,7 +32,7 @@ class RegisterPage extends GetView<AuthController> {
 
         if (success) {
           await Future.delayed(const Duration(milliseconds: 500));
-          Get.offAllNamed(AppRoutes.login);
+          Get.offAllNamed(AppRoutes.main);
         }
       }
     }

@@ -1,3 +1,5 @@
+// lib/features/todo/presentation/bindings/todo_firebase_binding.dart
+
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +11,7 @@ import '../../domain/usecases/update_todo_use_case.dart';
 import '../../domain/usecases/toggle_todo_use_case.dart';
 import '../../domain/usecases/delete_todo_use_case.dart';
 import '../controllers/todo_controller.dart';
+import '../../../../core/services/notification_service.dart';
 
 class TodoFirebaseBinding extends Bindings {
   @override
@@ -22,6 +25,12 @@ class TodoFirebaseBinding extends Bindings {
     Get.lazyPut<FirebaseAuth>(
       () => FirebaseAuth.instance,
       fenix: true,
+    );
+
+    // âœ… Notification Service (singleton)
+    Get.put<NotificationService>(
+      NotificationService(),
+      permanent: true,
     );
 
     // Repository - Firebase Implementation
@@ -47,6 +56,7 @@ class TodoFirebaseBinding extends Bindings {
         updateTodoUseCase: Get.find(),
         toggleTodoUseCase: Get.find(),
         deleteTodoUseCase: Get.find(),
+        notificationService: Get.find(), // âœ… Inject notification service
       ),
     );
   }
