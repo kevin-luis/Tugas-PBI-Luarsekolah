@@ -11,14 +11,24 @@ import '../../features/todo/presentation/bindings/todo_firebase_binding.dart';
 import '../../features/todo/presentation/pages/todo_list_page.dart';
 import '../../features/todo/presentation/pages/todo_detail_page.dart';
 import '../../pages/main_navigation.dart';
+import '../../pages/splash_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const initial = AppRoutes.login;
+  static const initial = AppRoutes.splash;
 
   static final routes = [
+    // Splash Screen
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashScreen(),
+      binding: AuthBinding(), // Inject AuthController
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+
     // Auth routes
     GetPage(
       name: AppRoutes.login,
