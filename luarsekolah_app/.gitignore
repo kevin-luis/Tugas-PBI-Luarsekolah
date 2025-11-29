@@ -47,5 +47,6 @@ app.*.map.json
 # Ignore Firebase config files
 lib/firebase_option.dart
 firebase.json
+google-services.json
 
 .vscode/
