@@ -78,7 +78,6 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@android:color/holo_green_dark" />
 
-            
 
         <meta-data
             android:name="flutterEmbedding"

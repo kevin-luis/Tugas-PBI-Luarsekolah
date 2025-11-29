@@ -29,8 +29,23 @@ class LoginPage extends GetView<AuthController> {
         );
 
         if (success) {
+          Get.snackbar(
+            'Login Berhasil',
+            'Selamat datang, ${controller.currentUser.value?.name}!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.shade100,
+            colorText: Colors.green.shade900,
+          );
           await Future.delayed(const Duration(milliseconds: 500));
           Get.offAllNamed(AppRoutes.main);
+        } else {
+          Get.snackbar(
+            'Login Gagal',
+            controller.errorMessage.value,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.shade100,
+            colorText: Colors.red.shade900,
+          );
         }
       }
     }
@@ -105,8 +120,9 @@ class LoginPage extends GetView<AuthController> {
                     )),
                 const SizedBox(height: 24),
                 Obx(() {
-                  final isFormValid =
-                      isEmailValid.value && isPasswordValid.value && isNotRobot.value;
+                  final isFormValid = isEmailValid.value &&
+                      isPasswordValid.value &&
+                      isNotRobot.value;
                   return PrimaryButton(
                     label: 'Masuk',
                     loadingText: 'Mohon Tunggu...',

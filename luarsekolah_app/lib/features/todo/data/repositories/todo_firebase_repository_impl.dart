@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/todo_entity.dart';
 import '../../domain/repositories/todo_repository.dart';
-import '../models/todo_firebase_model.dart'; // ✅ UBAH INI (tadinya todo_model.dart)
+import '../models/todo_firebase_model.dart';
 
 class TodoFirebaseRepositoryImpl implements TodoRepository {
   final FirebaseFirestore _firestore;
@@ -30,7 +30,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
 
       Query query = _getUserTodosCollection().orderBy('createdAt', descending: true);
 
-      // Filter by completed status if specified
       if (completed != null) {
         query = query.where('completed', isEqualTo: completed);
       }
@@ -40,7 +39,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
 
       final todos = snapshot.docs.map((doc) {
         try {
-          // ✅ UBAH: Gunakan TodoFirebaseModel.fromFirestore()
           return TodoFirebaseModel.fromFirestore(
             doc as DocumentSnapshot<Map<String, dynamic>>
           ).toEntity();
@@ -58,6 +56,99 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       print('[FirebaseTodoRepository] Error: $e');
       print('[FirebaseTodoRepository] StackTrace: $stackTrace');
       throw Exception('Gagal memuat todo: $e');
+    }
+  }
+
+  /// ✅ NEW: Get todos with pagination
+  @override
+  Future<List<TodoEntity>> getTodosPaginated({
+    bool? completed,
+    int limit = 20,
+    String? lastDocumentId,
+  }) async {
+    try {
+      print('[FirebaseTodoRepository] Fetching paginated todos (limit: $limit, lastDoc: $lastDocumentId)');
+
+      Query query = _getUserTodosCollection()
+          .orderBy('createdAt', descending: true)
+          .limit(limit);
+
+      // Filter by completed status if specified
+      if (completed != null) {
+        query = _getUserTodosCollection()
+            .where('completed', isEqualTo: completed)
+            .orderBy('createdAt', descending: true)
+            .limit(limit);
+      }
+
+      // If lastDocumentId is provided, start after that document
+      if (lastDocumentId != null && lastDocumentId.isNotEmpty) {
+        final lastDoc = await _getUserTodosCollection().doc(lastDocumentId).get();
+        if (lastDoc.exists) {
+          query = query.startAfterDocument(lastDoc);
+        }
+      }
+
+      final snapshot = await query.get();
+      print('[FirebaseTodoRepository] Retrieved ${snapshot.docs.length} paginated todos');
+
+      final todos = snapshot.docs.map((doc) {
+        try {
+          return TodoFirebaseModel.fromFirestore(
+            doc as DocumentSnapshot<Map<String, dynamic>>
+          ).toEntity();
+        } catch (e) {
+          print('[FirebaseTodoRepository] Error parsing todo ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<TodoEntity>().toList();
+
+      return todos;
+    } on FirebaseException catch (e) {
+      print('[FirebaseTodoRepository] FirebaseException: ${e.code} - ${e.message}');
+      throw Exception(_handleFirebaseError(e));
+    } catch (e, stackTrace) {
+      print('[FirebaseTodoRepository] Error: $e');
+      print('[FirebaseTodoRepository] StackTrace: $stackTrace');
+      throw Exception('Gagal memuat todo: $e');
+    }
+  }
+
+  /// ✅ NEW: Batch create todos (for dummy data injection)
+  @override
+  Future<void> batchCreateTodos(List<Map<String, dynamic>> todosData) async {
+    try {
+      print('[FirebaseTodoRepository] Batch creating ${todosData.length} todos');
+
+      // Firestore batch has a limit of 500 operations
+      const batchSize = 500;
+      
+      for (var i = 0; i < todosData.length; i += batchSize) {
+        final batch = _firestore.batch();
+        final end = (i + batchSize < todosData.length) ? i + batchSize : todosData.length;
+        final batchData = todosData.sublist(i, end);
+
+        for (var todoData in batchData) {
+          final docRef = _getUserTodosCollection().doc();
+          batch.set(docRef, {
+            'text': todoData['text'],
+            'completed': todoData['completed'],
+            'createdAt': Timestamp.fromDate(todoData['createdAt']),
+            'updatedAt': Timestamp.fromDate(todoData['updatedAt']),
+          });
+        }
+
+        await batch.commit();
+        print('[FirebaseTodoRepository] Batch committed: ${batchData.length} todos (${i + 1}-$end)');
+      }
+
+      print('[FirebaseTodoRepository] All ${todosData.length} todos created successfully');
+    } on FirebaseException catch (e) {
+      print('[FirebaseTodoRepository] Batch create error: ${e.code} - ${e.message}');
+      throw Exception(_handleFirebaseError(e));
+    } catch (e) {
+      print('[FirebaseTodoRepository] Error batch creating todos: $e');
+      throw Exception('Gagal membuat batch todos: $e');
     }
   }
 
@@ -79,10 +170,8 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
 
       final docRef = await _getUserTodosCollection().add(todoData);
       
-      // Get the created document
       final doc = await docRef.get();
       
-      // ✅ UBAH: Gunakan TodoFirebaseModel.fromFirestore()
       return TodoFirebaseModel.fromFirestore(
         doc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
@@ -113,14 +202,12 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
 
       await _getUserTodosCollection().doc(id).update(updateData);
 
-      // Get the updated document
       final doc = await _getUserTodosCollection().doc(id).get();
       
       if (!doc.exists) {
         throw Exception('Todo tidak ditemukan');
       }
 
-      // ✅ UBAH: Gunakan TodoFirebaseModel.fromFirestore()
       return TodoFirebaseModel.fromFirestore(
         doc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
@@ -138,7 +225,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
     try {
       print('[FirebaseTodoRepository] Toggling todo $id');
 
-      // Get current todo
       final doc = await _getUserTodosCollection().doc(id).get();
       
       if (!doc.exists) {
@@ -148,16 +234,13 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       final data = doc.data() as Map<String, dynamic>;
       final currentCompleted = data['completed'] ?? false;
 
-      // Toggle completed status
       await _getUserTodosCollection().doc(id).update({
         'completed': !currentCompleted,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
 
-      // Get updated document
       final updatedDoc = await _getUserTodosCollection().doc(id).get();
 
-      // ✅ UBAH: Gunakan TodoFirebaseModel.fromFirestore()
       return TodoFirebaseModel.fromFirestore(
         updatedDoc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
@@ -188,7 +271,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
     }
   }
 
-  /// Handle Firebase errors with user-friendly messages
   String _handleFirebaseError(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
@@ -220,7 +302,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
     }
   }
 
-  /// Get real-time todos stream (bonus feature)
   Stream<List<TodoEntity>> getTodosStream({bool? completed}) {
     try {
       Query query = _getUserTodosCollection().orderBy('createdAt', descending: true);
@@ -232,7 +313,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       return query.snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
           try {
-            // ✅ UBAH: Gunakan TodoFirebaseModel.fromFirestore()
             return TodoFirebaseModel.fromFirestore(
               doc as DocumentSnapshot<Map<String, dynamic>>
             ).toEntity();
@@ -248,7 +328,6 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
     }
   }
 
-  /// Batch delete completed todos
   Future<int> deleteCompletedTodos() async {
     try {
       final snapshot = await _getUserTodosCollection()
