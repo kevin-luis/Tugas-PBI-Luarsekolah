@@ -6,10 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/repositories/todo_firebase_repository_impl.dart';
 import '../../domain/repositories/todo_repository.dart';
 import '../../domain/usecases/get_todos_use_case.dart';
+import '../../domain/usecases/get_todos_paginated_use_case.dart';
 import '../../domain/usecases/create_todo_use_case.dart';
 import '../../domain/usecases/update_todo_use_case.dart';
 import '../../domain/usecases/toggle_todo_use_case.dart';
 import '../../domain/usecases/delete_todo_use_case.dart';
+import '../../domain/usecases/batch_create_todos_use_case.dart';
 import '../controllers/todo_controller.dart';
 import '../../../../core/services/notification_service.dart';
 
@@ -27,7 +29,7 @@ class TodoFirebaseBinding extends Bindings {
       fenix: true,
     );
 
-    // âœ… Notification Service (singleton)
+    // Notification Service (singleton)
     Get.put<NotificationService>(
       NotificationService(),
       permanent: true,
@@ -43,20 +45,24 @@ class TodoFirebaseBinding extends Bindings {
 
     // Use Cases
     Get.lazyPut(() => GetTodosUseCase(Get.find<TodoRepository>()));
+    Get.lazyPut(() => GetTodosPaginatedUseCase(Get.find<TodoRepository>())); // ✅ NEW
     Get.lazyPut(() => CreateTodoUseCase(Get.find<TodoRepository>()));
     Get.lazyPut(() => UpdateTodoUseCase(Get.find<TodoRepository>()));
     Get.lazyPut(() => ToggleTodoUseCase(Get.find<TodoRepository>()));
     Get.lazyPut(() => DeleteTodoUseCase(Get.find<TodoRepository>()));
+    Get.lazyPut(() => BatchCreateTodosUseCase(Get.find<TodoRepository>())); // ✅ NEW
 
     // Controller
     Get.lazyPut(
       () => TodoController(
         getTodosUseCase: Get.find(),
+        getTodosPaginatedUseCase: Get.find(), // ✅ NEW
         createTodoUseCase: Get.find(),
         updateTodoUseCase: Get.find(),
         toggleTodoUseCase: Get.find(),
         deleteTodoUseCase: Get.find(),
-        notificationService: Get.find(), // âœ… Inject notification service
+        batchCreateTodosUseCase: Get.find(), // ✅ NEW
+        notificationService: Get.find(),
       ),
     );
   }

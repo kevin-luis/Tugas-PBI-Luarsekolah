@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// lib/features/auth/presentation/controllers/auth_controller.dart
 import 'package:get/get.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_use_case.dart';
@@ -6,7 +6,7 @@ import '../../domain/usecases/register_use_case.dart';
 import '../../domain/usecases/login_with_google_use_case.dart';
 import '../../domain/usecases/logout_use_case.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
-import '../../domain/usecases/update_user_profile_use_case.dart'; // Tambahkan ini
+import '../../domain/usecases/update_user_profile_use_case.dart';
 import '../../../../core/error/failures.dart';
 
 class AuthController extends GetxController {
@@ -15,7 +15,7 @@ class AuthController extends GetxController {
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
-  final UpdateUserProfileUseCase updateUserProfileUseCase; // Tambahkan ini
+  final UpdateUserProfileUseCase updateUserProfileUseCase;
 
   AuthController({
     required this.loginUseCase,
@@ -23,7 +23,7 @@ class AuthController extends GetxController {
     required this.loginWithGoogleUseCase,
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
-    required this.updateUserProfileUseCase, // Tambahkan ini
+    required this.updateUserProfileUseCase,
   });
 
   final Rx<UserEntity?> currentUser = Rx<UserEntity?>(null);
@@ -59,27 +59,11 @@ class AuthController extends GetxController {
       (failure) {
         isLoading.value = false;
         errorMessage.value = _mapFailureToMessage(failure);
-        Get.snackbar(
-          'Login Gagal',
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade900,
-          duration: const Duration(seconds: 3),
-        );
         return false;
       },
       (user) {
         isLoading.value = false;
         currentUser.value = user;
-        Get.snackbar(
-          'Login Berhasil',
-          'Selamat datang, ${user.name}!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
-          duration: const Duration(seconds: 2),
-        );
         return true;
       },
     );
@@ -105,27 +89,11 @@ class AuthController extends GetxController {
       (failure) {
         isLoading.value = false;
         errorMessage.value = _mapFailureToMessage(failure);
-        Get.snackbar(
-          'Registrasi Gagal',
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade900,
-          duration: const Duration(seconds: 3),
-        );
         return false;
       },
       (user) {
         isLoading.value = false;
         currentUser.value = user;
-        Get.snackbar(
-          'Registrasi Berhasil',
-          'Akun berhasil didaftarkan!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
-          duration: const Duration(seconds: 2),
-        );
         return true;
       },
     );
@@ -141,64 +109,34 @@ class AuthController extends GetxController {
       (failure) {
         isLoading.value = false;
         errorMessage.value = _mapFailureToMessage(failure);
-        Get.snackbar(
-          'Login Gagal',
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade900,
-          duration: const Duration(seconds: 3),
-        );
         return false;
       },
       (user) {
         isLoading.value = false;
         currentUser.value = user;
-        Get.snackbar(
-          'Login Berhasil',
-          'Selamat datang, ${user.name}!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
-          duration: const Duration(seconds: 2),
-        );
         return true;
       },
     );
   }
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
     isLoading.value = true;
     final result = await logoutUseCase();
     
-    result.fold(
+    return result.fold(
       (failure) {
         isLoading.value = false;
-        Get.snackbar(
-          'Logout Gagal',
-          _mapFailureToMessage(failure),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade900,
-          duration: const Duration(seconds: 3),
-        );
+        errorMessage.value = _mapFailureToMessage(failure);
+        return false;
       },
       (_) {
         isLoading.value = false;
         currentUser.value = null;
-        Get.snackbar(
-          'Logout Berhasil',
-          'Sampai jumpa lagi!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
-          duration: const Duration(seconds: 2),
-        );
+        return true;
       },
     );
   }
 
-  // Tambahkan method ini
   Future<bool> updateProfile({
     required String name,
   }) async {
@@ -220,7 +158,6 @@ class AuthController extends GetxController {
       },
       (_) async {
         isLoading.value = false;
-        // Refresh current user data
         await checkCurrentUser();
         return true;
       },
