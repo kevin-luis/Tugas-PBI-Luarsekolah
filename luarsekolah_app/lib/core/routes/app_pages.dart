@@ -10,6 +10,11 @@ import '../../features/course/presentation/pages/course_form_page.dart';
 import '../../features/todo/presentation/bindings/todo_firebase_binding.dart';
 import '../../features/todo/presentation/pages/todo_list_page.dart';
 import '../../features/todo/presentation/pages/todo_detail_page.dart';
+import '../../features/account/presentation/bindings/account_binding.dart';
+import '../../features/account/presentation/pages/account_menu_page.dart';
+import '../../features/account/presentation/pages/edit_profile_page.dart';
+import '../../features/home/presentation/bindings/home_binding.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 import '../../pages/main_navigation.dart';
 import '../../pages/splash_screen.dart';
 import 'app_routes.dart';
@@ -27,6 +32,13 @@ class AppPages {
       binding: AuthBinding(), // Inject AuthController
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+
+    //Home Routes
+    GetPage(
+      name: AppRoutes.home,
+      page: () => const HomePage(),
+      binding: HomeBinding(),
     ),
 
     // Auth routes
@@ -84,5 +96,23 @@ class AppPages {
       ),
       binding: TodoFirebaseBinding(),
     ),
+
+    // Account routes
+    GetPage(
+      name: AppRoutes.accountMenu,
+      page: () => const AccountMenuPage(),
+      binding: AccountBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.editProfile,
+      page: () => const EditProfilePage(),
+      binding: AccountBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+
+    
   ];
 }

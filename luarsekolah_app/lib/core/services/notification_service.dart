@@ -10,7 +10,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/todo/presentation/controllers/todo_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 /// Handler untuk background messages (harus top-level function)
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,14 +18,13 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('[FCM Background] Body: ${message.notification?.body}');
 }
 
-// Top-level function untuk handle notification action saat app killed
+/// Top-level function untuk handle notification action saat app killed
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) async {
   print('[Background Handler] Notification tapped in background!');
   print('[Background Handler] Action: ${notificationResponse.actionId}');
   print('[Background Handler] Payload: ${notificationResponse.payload}');
 
-  // Initialize Firebase jika belum
   try {
     await Firebase.initializeApp();
     print('[Background Handler] ✅ Firebase initialized');
@@ -34,15 +32,12 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     print('[Background Handler] Firebase already initialized or error: $e');
   }
 
-  // Handle actions
   if (notificationResponse.actionId == 'mark_complete') {
     await _handleMarkCompleteBackground(notificationResponse.payload);
-  } else if (notificationResponse.actionId == 'snooze') {
-    await _handleSnoozeBackground(notificationResponse.payload);
   }
 }
 
-// Helper function untuk mark complete di background
+/// Helper function untuk mark complete di background
 Future<void> _handleMarkCompleteBackground(String? payload) async {
   if (payload == null || payload.isEmpty) {
     print('[Background Handler] Payload is null');
@@ -55,7 +50,6 @@ Future<void> _handleMarkCompleteBackground(String? payload) async {
     final firestore = FirebaseFirestore.instance;
     final auth = FirebaseAuth.instance;
     
-    // Get current user
     User? user = auth.currentUser;
     
     if (user == null) {
@@ -65,7 +59,6 @@ Future<void> _handleMarkCompleteBackground(String? payload) async {
 
     final userId = user.uid;
 
-    // Get todo document
     final todoDoc = await firestore
         .collection('users')
         .doc(userId)
@@ -80,7 +73,6 @@ Future<void> _handleMarkCompleteBackground(String? payload) async {
 
     final currentCompleted = todoDoc.data()?['completed'] ?? false;
 
-    // Toggle completed status
     await firestore
         .collection('users')
         .doc(userId)
@@ -93,7 +85,6 @@ Future<void> _handleMarkCompleteBackground(String? payload) async {
 
     print('[Background Handler] ✅ Todo marked complete: $payload');
 
-    // Show notification feedback
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     
     const androidDetails = AndroidNotificationDetails(
@@ -114,74 +105,6 @@ Future<void> _handleMarkCompleteBackground(String? payload) async {
     );
   } catch (e, stackTrace) {
     print('[Background Handler] Error: $e');
-    print('[Background Handler] StackTrace: $stackTrace');
-  }
-}
-
-// Helper function untuk snooze di background
-Future<void> _handleSnoozeBackground(String? payload) async {
-  if (payload == null || payload.isEmpty) {
-    print('[Background Handler] Snooze payload is null');
-    return;
-  }
-
-  print('[Background Handler] Processing snooze: $payload');
-
-  try {
-    // Initialize timezone
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
-
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10));
-
-    const androidDetails = AndroidNotificationDetails(
-      'todo_reminder_channel',
-      'Todo Reminders',
-      channelDescription: 'Reminder untuk Todo App',
-      importance: Importance.max,
-      priority: Priority.high,
-      enableVibration: true,
-      playSound: true,
-      actions: <AndroidNotificationAction>[
-        AndroidNotificationAction(
-          'mark_complete',
-          '✅ Tandai Selesai',
-          showsUserInterface: false,
-          cancelNotification: true,
-        ),
-        AndroidNotificationAction(
-          'snooze',
-          '⏰ Ingatkan 10 detik lagi',
-          showsUserInterface: false,
-          cancelNotification: true,
-        ),
-      ],
-    );
-
-    const notificationDetails = NotificationDetails(android: androidDetails);
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      '⏰ Reminder: Todo',
-      'Jangan lupa selesaikan todo ini!',
-      scheduledDate,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      payload: payload,
-    );
-
-    print('[Background Handler] ✅ Snooze scheduled successfully');
-
-    // Show immediate feedback
-    await flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000 + 1,
-      '⏰ Reminder Ditunda',
-      'Kamu akan diingatkan lagi dalam 10 detik',
-      notificationDetails,
-    );
-  } catch (e, stackTrace) {
-    print('[Background Handler] Error snoozing: $e');
     print('[Background Handler] StackTrace: $stackTrace');
   }
 }
@@ -210,23 +133,13 @@ class NotificationService {
     }
 
     try {
-      // Initialize timezone
       tz.initializeTimeZones();
       tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
 
-      // Request permission
       await _requestPermission();
-
-      // Initialize local notifications
       await _initializeLocalNotifications();
-
-      // Create notification channels
       await _createNotificationChannels();
-
-      // Get FCM token
       await _getFCMToken();
-
-      // Setup FCM handlers
       _setupFCMHandlers();
 
       _isInitialized = true;
@@ -250,17 +163,14 @@ class NotificationService {
         sound: true,
       );
 
-      print(
-          '[NotificationService] Permission status: ${settings.authorizationStatus}');
+      print('[NotificationService] Permission status: ${settings.authorizationStatus}');
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('[NotificationService] ✅ User granted permission');
-      } else if (settings.authorizationStatus ==
-          AuthorizationStatus.provisional) {
+      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
         print('[NotificationService] ⚠️ User granted provisional permission');
       } else {
-        print(
-            '[NotificationService] ❌ User declined or has not accepted permission');
+        print('[NotificationService] ❌ User declined or has not accepted permission');
       }
     } catch (e) {
       print('[NotificationService] Error requesting permission: $e');
@@ -270,7 +180,6 @@ class NotificationService {
   /// Create notification channels (Android only)
   Future<void> _createNotificationChannels() async {
     try {
-      // Channel untuk notifikasi biasa
       const AndroidNotificationChannel todoChannel = AndroidNotificationChannel(
         'todo_channel',
         'Todo Notifications',
@@ -281,13 +190,11 @@ class NotificationService {
         showBadge: true,
       );
 
-      // Channel untuk reminder
-      const AndroidNotificationChannel reminderChannel =
-          AndroidNotificationChannel(
+      const AndroidNotificationChannel reminderChannel = AndroidNotificationChannel(
         'todo_reminder_channel',
         'Todo Reminders',
         description: 'Reminder untuk Todo App',
-        importance: Importance.high,
+        importance: Importance.max,
         playSound: true,
         enableVibration: true,
         showBadge: true,
@@ -295,13 +202,11 @@ class NotificationService {
       );
 
       await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(todoChannel);
 
       await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(reminderChannel);
 
       print('[NotificationService] ✅ Notification channels created');
@@ -312,8 +217,7 @@ class NotificationService {
 
   /// Initialize local notifications
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -328,18 +232,15 @@ class NotificationService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
-      onDidReceiveBackgroundNotificationResponse:
-          _onNotificationTappedBackground,
+      onDidReceiveBackgroundNotificationResponse: _onNotificationTappedBackground,
     );
 
     print('[NotificationService] Local notifications initialized');
   }
 
-  /// Background notification tap handler (must be top-level or static)
   @pragma('vm:entry-point')
   static void _onNotificationTappedBackground(NotificationResponse response) {
-    print(
-        '[NotificationService] Background notification tapped: ${response.payload}');
+    print('[NotificationService] Background notification tapped: ${response.payload}');
     print('[NotificationService] Action: ${response.actionId}');
 
     if (response.payload != null && response.payload!.isNotEmpty) {
@@ -451,31 +352,29 @@ class NotificationService {
     }
   }
 
-  /// Schedule notification
+  /// Schedule notification with custom time
   Future<void> scheduleNotification({
     required String title,
     required String body,
-    required Duration delay,
+    required DateTime scheduledDate,
     String? payload,
     int? id,
   }) async {
     try {
-      final notificationId =
-          id ?? DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      final scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
+      final notificationId = id ?? DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
       print('');
-      print('╔════════════════════════════════════════════════════════╗');
+      print('╔═══════════════════════════════════════════════════════════╗');
       print('⏰ SCHEDULING NOTIFICATION');
-      print('╠════════════════════════════════════════════════════════╣');
+      print('╠═══════════════════════════════════════════════════════════╣');
       print('ID: $notificationId');
       print('Title: $title');
       print('Body: $body');
       print('Current Time: ${tz.TZDateTime.now(tz.local)}');
-      print('Scheduled Time: $scheduledDate');
-      print('Delay: ${delay.inSeconds} seconds');
+      print('Scheduled Time: $tzScheduledDate');
       print('Payload: $payload');
-      print('╚════════════════════════════════════════════════════════╝');
+      print('╚═══════════════════════════════════════════════════════════╝');
       print('');
 
       const androidDetails = AndroidNotificationDetails(
@@ -497,12 +396,6 @@ class NotificationService {
             showsUserInterface: true,
             cancelNotification: true,
           ),
-          AndroidNotificationAction(
-            'snooze',
-            '⏰ Ingatkan 10 detik lagi',
-            showsUserInterface: false,
-            cancelNotification: true,
-          ),
         ],
       );
 
@@ -522,10 +415,11 @@ class NotificationService {
         notificationId,
         title,
         body,
-        scheduledDate,
+        tzScheduledDate,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: payload,
+        matchDateTimeComponents: DateTimeComponents.time
       );
 
       print('[NotificationService] ✅ Notification scheduled successfully!');
@@ -551,20 +445,17 @@ class NotificationService {
   /// Handle notification tap (foreground)
   void _onNotificationTapped(NotificationResponse response) {
     print('');
-    print('╔════════════════════════════════════════════════════════╗');
+    print('╔═══════════════════════════════════════════════════════════╗');
     print('👆 NOTIFICATION TAPPED');
-    print('╠════════════════════════════════════════════════════════╣');
+    print('╠═══════════════════════════════════════════════════════════╣');
     print('Action ID: ${response.actionId}');
     print('Payload: ${response.payload}');
-    print('╚════════════════════════════════════════════════════════╝');
+    print('╚═══════════════════════════════════════════════════════════╝');
     print('');
 
     if (response.actionId == 'mark_complete') {
       print('[NotificationService] 🎯 Executing mark_complete action');
       _handleMarkComplete(response.payload);
-    } else if (response.actionId == 'snooze') {
-      print('[NotificationService] 🎯 Executing snooze action');
-      _handleSnooze(response.payload);
     } else {
       if (response.payload != null && response.payload!.isNotEmpty) {
         _navigateToTodo(response.payload!);
@@ -572,7 +463,7 @@ class NotificationService {
     }
   }
 
-  /// ✅ Handle mark complete action
+  /// Handle mark complete action
   Future<void> _handleMarkComplete(String? payload) async {
     if (payload == null || payload.isEmpty) {
       print('[NotificationService] ❌ Payload is null or empty');
@@ -582,15 +473,12 @@ class NotificationService {
     print('[NotificationService] ✅ Processing mark complete: $payload');
 
     try {
-      // Try controller first (if app is running)
       if (Get.isRegistered<TodoController>()) {
         final todoController = Get.find<TodoController>();
         await todoController.toggleComplete(payload);
         print('[NotificationService] ✅ Completed via controller');
       } else {
-        // Fallback: Direct Firestore update
-        print(
-            '[NotificationService] ⚠️ Controller not available, using direct Firestore');
+        print('[NotificationService] ⚠️ Controller not available, using direct Firestore');
         await _markTodoCompleteDirectly(payload);
       }
 
@@ -608,7 +496,7 @@ class NotificationService {
     }
   }
 
-  /// ✅ Mark todo complete directly via Firestore
+  /// Mark todo complete directly via Firestore
   Future<void> _markTodoCompleteDirectly(String todoId) async {
     try {
       final firestore = FirebaseFirestore.instance;
@@ -620,7 +508,6 @@ class NotificationService {
         throw Exception('User not logged in');
       }
 
-      // Get current todo
       final todoDoc = await firestore
           .collection('users')
           .doc(userId)
@@ -635,7 +522,6 @@ class NotificationService {
 
       final currentCompleted = todoDoc.data()?['completed'] ?? false;
 
-      // Toggle completed
       await firestore
           .collection('users')
           .doc(userId)
@@ -653,54 +539,12 @@ class NotificationService {
     }
   }
 
-  /// ✅ Handle snooze action
-  Future<void> _handleSnooze(String? payload) async {
-    if (payload == null || payload.isEmpty) {
-      print('[NotificationService] ❌ Snooze payload is null or empty');
-      return;
-    }
-
-    print('');
-    print('╔════════════════════════════════════════════════════════╗');
-    print('⏰ SNOOZE TRIGGERED');
-    print('╠════════════════════════════════════════════════════════╣');
-    print('Payload: $payload');
-    print('Delay: 10 seconds');
-    print('╚════════════════════════════════════════════════════════╝');
-    print('');
-
-    try {
-      await scheduleNotification(
-        title: '⏰ Reminder: Todo',
-        body: 'Jangan lupa selesaikan todo ini!',
-        delay: const Duration(seconds: 10),
-        payload: payload,
-      );
-
-      await showLocalNotification(
-        title: '⏰ Reminder Ditunda',
-        body: 'Kamu akan diingatkan lagi dalam 10 detik',
-      );
-
-      print('[NotificationService] ✅ Snooze scheduled successfully');
-    } catch (e) {
-      print('[NotificationService] ❌ Error snoozing: $e');
-
-      await showLocalNotification(
-        title: '❌ Error',
-        body: 'Gagal mengatur reminder',
-      );
-    }
-  }
-
   /// Navigate to todo detail
   void _navigateToTodo(String todoId) {
     print('[NotificationService] Navigating to todo: $todoId');
 
     Future.delayed(const Duration(milliseconds: 500), () {
       if (Get.isRegistered<dynamic>()) {
-        // Tambahkan routing sesuai app kamu
-        // Get.toNamed('/todo-detail', arguments: {'todoId': todoId});
         print('[NotificationService] Navigate to todo: $todoId');
       }
     });
@@ -709,14 +553,11 @@ class NotificationService {
   /// Check pending payload and process it
   void processPendingPayload() {
     if (_pendingPayload != null) {
-      print(
-          '[NotificationService] Processing pending payload: $_pendingPayload');
+      print('[NotificationService] Processing pending payload: $_pendingPayload');
       print('[NotificationService] Processing pending action: $_pendingAction');
 
       if (_pendingAction == 'mark_complete') {
         _handleMarkComplete(_pendingPayload);
-      } else if (_pendingAction == 'snooze') {
-        _handleSnooze(_pendingPayload);
       } else {
         _navigateToTodo(_pendingPayload!);
       }

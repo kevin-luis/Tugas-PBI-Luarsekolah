@@ -1,8 +1,11 @@
+// lib/features/todo/presentation/pages/todo_detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/todo_entity.dart';
 import '../controllers/todo_controller.dart';
 import '../widgets/create_edit_todo_dialog.dart';
+import '../widgets/reminder_picker_dialog.dart';
 
 class TodoDetailPage extends GetView<TodoController> {
   final String todoId;
@@ -61,7 +64,9 @@ class TodoDetailPage extends GetView<TodoController> {
               _buildContentCard(currentTodo),
               const SizedBox(height: 16),
               _buildInfoCard(currentTodo),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              if (!currentTodo.completed) _buildReminderCard(currentTodo),
+              if (!currentTodo.completed) const SizedBox(height: 24),
               _buildActionButton(currentTodo),
             ],
           ),
@@ -217,13 +222,67 @@ class TodoDetailPage extends GetView<TodoController> {
               'Terakhir diupdate',
               _formatDateTime(todo.updatedAt),
             ),
-            const Divider(height: 24),
-            _buildInfoRow(
-              Icons.fingerprint,
-              'ID',
-              todo.id,
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReminderCard(TodoEntity todo) {
+    return Card(
+      color: Colors.white,
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => _showReminderPicker(todo),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.notifications_active,
+                  color: Colors.orange[700],
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Atur Reminder',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Ingatkan saya untuk menyelesaikan todo ini',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey[400],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -346,7 +405,14 @@ class TodoDetailPage extends GetView<TodoController> {
 
     if (confirm == true) {
       await controller.deleteTodo(id);
-      Get.back(); // Return to list page
+      Get.back();
     }
+  }
+
+  void _showReminderPicker(TodoEntity todo) async {
+    await Get.dialog(
+      ReminderPickerDialog(todo: todo),
+      barrierDismissible: true,
+    );
   }
 }
