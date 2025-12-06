@@ -1,5 +1,6 @@
 // lib/features/todo/presentation/controllers/todo_controller.dart
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/todo_entity.dart';
 import '../../domain/usecases/get_todos_use_case.dart';
@@ -8,7 +9,6 @@ import '../../domain/usecases/create_todo_use_case.dart';
 import '../../domain/usecases/update_todo_use_case.dart';
 import '../../domain/usecases/toggle_todo_use_case.dart';
 import '../../domain/usecases/delete_todo_use_case.dart';
-import '../../domain/usecases/batch_create_todos_use_case.dart';
 import '../../../../core/services/notification_service.dart';
 
 enum TodoFilter { all, active, completed }
@@ -20,7 +20,6 @@ class TodoController extends GetxController {
   final UpdateTodoUseCase updateTodoUseCase;
   final ToggleTodoUseCase toggleTodoUseCase;
   final DeleteTodoUseCase deleteTodoUseCase;
-  final BatchCreateTodosUseCase batchCreateTodosUseCase;
   final NotificationService notificationService;
 
   TodoController({
@@ -30,7 +29,6 @@ class TodoController extends GetxController {
     required this.updateTodoUseCase,
     required this.toggleTodoUseCase,
     required this.deleteTodoUseCase,
-    required this.batchCreateTodosUseCase,
     required this.notificationService,
   });
 
@@ -73,7 +71,7 @@ class TodoController extends GetxController {
     _currentFilter.value = filter;
   }
 
-  /// ✅ NEW: Initial load with pagination
+  /// Initial load with pagination
   Future<void> loadTodosInitial() async {
     _isLoading.value = true;
     _errorMessage.value = null;
@@ -87,7 +85,6 @@ class TodoController extends GetxController {
 
       _allTodos.value = todos;
       
-      // If we got less than 20, there's no more data
       if (todos.length < 20) {
         _hasMoreData.value = false;
       }
@@ -107,7 +104,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// ✅ NEW: Load more todos (for pagination)
+  /// Load more todos (for pagination)
   Future<void> loadMoreTodos() async {
     if (_isLoadingMore.value || !_hasMoreData.value || _allTodos.isEmpty) {
       return;
@@ -116,7 +113,6 @@ class TodoController extends GetxController {
     _isLoadingMore.value = true;
 
     try {
-      // Get the last document ID from current list
       final lastDocId = _allTodos.last.id;
 
       final newTodos = await getTodosPaginatedUseCase(
@@ -128,7 +124,6 @@ class TodoController extends GetxController {
         _hasMoreData.value = false;
       }
 
-      // Add new todos to existing list
       _allTodos.addAll(newTodos);
 
       print('[TodoController] Loaded ${newTodos.length} more todos. Total: ${_allTodos.length}');
@@ -145,33 +140,28 @@ class TodoController extends GetxController {
     }
   }
 
-  /// Original load method (for refresh)
+  /// Refresh todos
   Future<void> loadTodos() async {
     await loadTodosInitial();
   }
 
+  /// Create new todo
   Future<void> createTodo({required String text, bool completed = false}) async {
     try {
       final todo = await createTodoUseCase(text: text, completed: completed);
       
-      // Add new todo to list (at beginning)
       _allTodos.insert(0, todo);
-
-      // Send notification when todo is created
-      await notificationService.showLocalNotification(
-        title: todo.text,
-        body: 'Todo berhasil ditambahkan',
-        payload: todo.id,
-      );
 
       Get.snackbar(
         'Sukses',
         'Todo berhasil dibuat!',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF26A69A),
+        colorText: Colors.white,
       );
 
-      print('[TodoController] Todo created and notification sent');
+      print('[TodoController] Todo created: ${todo.text}');
     } catch (e) {
       print('[TodoController] Error creating todo: $e');
       
@@ -179,10 +169,13 @@ class TodoController extends GetxController {
         'Error',
         'Gagal membuat todo: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
+  /// Update todo
   Future<void> updateTodo({
     required String id,
     String? text,
@@ -195,7 +188,6 @@ class TodoController extends GetxController {
         completed: completed,
       );
 
-      // Update in list
       final index = _allTodos.indexWhere((t) => t.id == id);
       if (index != -1) {
         _allTodos[index] = updatedTodo;
@@ -206,6 +198,8 @@ class TodoController extends GetxController {
         'Todo berhasil diupdate!',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF26A69A),
+        colorText: Colors.white,
       );
     } catch (e) {
       print('[TodoController] Error updating todo: $e');
@@ -214,15 +208,17 @@ class TodoController extends GetxController {
         'Error',
         'Gagal mengupdate todo: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
+  /// Toggle todo completion status
   Future<void> toggleComplete(String id) async {
     try {
       final updatedTodo = await toggleTodoUseCase(id);
 
-      // Update in list
       final index = _allTodos.indexWhere((t) => t.id == id);
       if (index != -1) {
         _allTodos[index] = updatedTodo;
@@ -235,6 +231,10 @@ class TodoController extends GetxController {
             : 'Todo ditandai belum selesai',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 1),
+        backgroundColor: updatedTodo.completed 
+            ? const Color(0xFF26A69A) 
+            : Colors.orange,
+        colorText: Colors.white,
       );
     } catch (e) {
       print('[TodoController] Error toggling todo: $e');
@@ -243,15 +243,17 @@ class TodoController extends GetxController {
         'Error',
         'Gagal mengupdate: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
+  /// Delete todo
   Future<void> deleteTodo(String id) async {
     try {
       await deleteTodoUseCase(id);
 
-      // Remove from list
       _allTodos.removeWhere((t) => t.id == id);
 
       Get.snackbar(
@@ -259,6 +261,8 @@ class TodoController extends GetxController {
         'Todo berhasil dihapus!',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
+        backgroundColor: Colors.red[400],
+        colorText: Colors.white,
       );
     } catch (e) {
       print('[TodoController] Error deleting todo: $e');
@@ -267,97 +271,39 @@ class TodoController extends GetxController {
         'Error',
         'Gagal menghapus: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
-  /// ✅ NEW: Generate and inject 100 dummy todos
-  Future<void> generateDummyTodos() async {
+  /// Schedule reminder for todo
+  Future<void> scheduleReminder({
+    required TodoEntity todo,
+    required DateTime scheduledDate,
+  }) async {
     try {
-      _isLoading.value = true;
+      // Generate unique notification ID based on todo ID
+      final notificationId = todo.id.hashCode.abs();
 
-      final List<Map<String, dynamic>> dummyTodos = [];
-      final now = DateTime.now();
-
-      final tasks = [
-        'Belajar Flutter Clean Architecture',
-        'Mengerjakan tugas kuliah',
-        'Meeting dengan tim project',
-        'Review code pull request',
-        'Menulis dokumentasi API',
-        'Testing fitur baru aplikasi',
-        'Membaca buku programming',
-        'Olahraga pagi',
-        'Belanja kebutuhan bulanan',
-        'Membayar tagihan listrik',
-        'Servis motor/mobil',
-        'Backup data penting',
-        'Update dependencies project',
-        'Refactor kode yang sudah ada',
-        'Membuat unit test',
-        'Deploy aplikasi ke production',
-        'Memperbaiki bug yang dilaporkan',
-        'Design mockup UI/UX',
-        'Riset teknologi baru',
-        'Belajar Dart advanced features',
-      ];
-
-      for (var i = 0; i < 100; i++) {
-        final randomTask = tasks[i % tasks.length];
-        final daysAgo = i; // Each todo created progressively older
-        final isCompleted = i % 3 == 0; // Every 3rd todo is completed
-
-        dummyTodos.add({
-          'text': '$randomTask #${i + 1}',
-          'completed': isCompleted,
-          'createdAt': now.subtract(Duration(days: daysAgo, hours: i % 24)),
-          'updatedAt': now.subtract(Duration(days: daysAgo, hours: i % 24)),
-        });
-      }
-
-      await batchCreateTodosUseCase(dummyTodos);
-
-      // Reload todos after injection
-      await loadTodosInitial();
-
-      Get.snackbar(
-        'Sukses',
-        '100 dummy todos berhasil dibuat!',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
-
-      print('[TodoController] ✅ 100 dummy todos created successfully');
-    } catch (e) {
-      print('[TodoController] Error generating dummy todos: $e');
-      
-      Get.snackbar(
-        'Error',
-        'Gagal membuat dummy todos: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> remindTodo(TodoEntity todo) async {
-    try {
       await notificationService.scheduleNotification(
-        title: 'Reminder: ${todo.text}',
+        title: '⏰ Reminder: ${todo.text}',
         body: 'Jangan lupa selesaikan todo ini!',
-        delay: const Duration(seconds: 10),
+        scheduledDate: scheduledDate,
         payload: todo.id,
+        id: notificationId,
       );
 
       Get.snackbar(
         'Reminder Dijadwalkan',
-        'Kamu akan diingatkan dalam 10 detik',
+        'Kamu akan diingatkan pada ${_formatDateTime(scheduledDate)}',
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
       );
 
-      print('[TodoController] ✅ Reminder scheduled for: ${todo.text}');
+      print('[TodoController] ✅ Reminder scheduled for: ${todo.text} at $scheduledDate');
     } catch (e) {
       print('[TodoController] Error scheduling reminder: $e');
       
@@ -365,10 +311,32 @@ class TodoController extends GetxController {
         'Error',
         'Gagal menjadwalkan reminder: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
+  /// Cancel reminder for specific todo
+  Future<void> cancelReminder(String todoId) async {
+    try {
+      final notificationId = todoId.hashCode.abs();
+      await notificationService.cancelNotification(notificationId);
+      
+      Get.snackbar(
+        'Reminder Dibatalkan',
+        'Reminder untuk todo ini telah dibatalkan',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print('[TodoController] Error cancelling reminder: $e');
+    }
+  }
+
+  /// Cancel all reminders
   Future<void> cancelAllReminders() async {
     try {
       await notificationService.cancelAllScheduledNotifications();
@@ -378,9 +346,46 @@ class TodoController extends GetxController {
         'Semua reminder dibatalkan',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
       );
     } catch (e) {
       print('[TodoController] Error cancelling reminders: $e');
+    }
+  }
+
+  /// Get pending notifications count
+  Future<int> getPendingRemindersCount() async {
+    try {
+      final pending = await notificationService.getPendingNotifications();
+      return pending.length;
+    } catch (e) {
+      print('[TodoController] Error getting pending notifications: $e');
+      return 0;
+    }
+  }
+
+  /// Format DateTime for display
+  String _formatDateTime(DateTime date) {
+    final now = DateTime.now();
+    final localDate = date.toLocal();
+    
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+
+    if (localDate.year == now.year &&
+        localDate.month == now.month &&
+        localDate.day == now.day) {
+      return 'Hari ini ${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
+    } else if (localDate.year == now.year &&
+        localDate.month == now.month &&
+        localDate.day == now.day + 1) {
+      return 'Besok ${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
+    } else {
+      return '${localDate.day} ${months[localDate.month - 1]} ${localDate.year}, '
+          '${localDate.hour.toString().padLeft(2, '0')}:${localDate.minute.toString().padLeft(2, '0')}';
     }
   }
 }

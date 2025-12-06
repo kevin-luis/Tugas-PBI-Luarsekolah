@@ -30,27 +30,6 @@ class TodoListPage extends GetView<TodoController> {
                 onPressed: controller.isLoading ? null : controller.loadTodos,
                 tooltip: 'Refresh',
               )),
-          // ✅ NEW: Button to generate dummy data
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'generate') {
-                _showGenerateDummyDialog();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'generate',
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle_outline, color: Colors.teal),
-                    SizedBox(width: 8),
-                    Text('Generate 100 Dummy Todos'),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -144,16 +123,6 @@ class TodoListPage extends GetView<TodoController> {
               'Tap tombol + untuk membuat todo baru',
               style: TextStyle(color: Colors.grey[500]),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _showGenerateDummyDialog(),
-              icon: const Icon(Icons.data_array),
-              label: const Text('Generate 100 Dummy Todos'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-              ),
-            ),
           ],
         ),
       );
@@ -205,7 +174,6 @@ class TodoListPage extends GetView<TodoController> {
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {
-                // ✅ NEW: Lazy loading trigger
                 if (!controller.isLoadingMore &&
                     controller.hasMoreData &&
                     scrollInfo.metrics.pixels >=
@@ -218,7 +186,6 @@ class TodoListPage extends GetView<TodoController> {
                 padding: const EdgeInsets.all(12),
                 itemCount: filteredTodos.length + (controller.hasMoreData ? 1 : 0),
                 itemBuilder: (context, index) {
-                  // ✅ Show loading indicator at the bottom
                   if (index == filteredTodos.length) {
                     return Obx(() => controller.isLoadingMore
                         ? const Padding(
@@ -260,42 +227,5 @@ class TodoListPage extends GetView<TodoController> {
 
   void _navigateToDetail(todo) async {
     await Get.to(() => TodoDetailPage(todoId: todo.id));
-  }
-
-  // ✅ NEW: Show confirmation dialog before generating dummy data
-  void _showGenerateDummyDialog() {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Generate Dummy Data'),
-          ],
-        ),
-        content: const Text(
-          'Apakah Anda yakin ingin membuat 100 dummy todos? '
-          'Data ini akan ditambahkan ke database Firebase Anda.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              controller.generateDummyTodos();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Generate'),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
-import 'package:luarsekolah_app/features/todo/presentation/bindings/todo_firebase_binding.dart';
-import '../pages/home_page.dart';
-import '../features/course/presentation/pages/course_list_page.dart';
+import '../features/todo/presentation/bindings/todo_firebase_binding.dart';
 import '../features/course/presentation/bindings/course_binding.dart';
+import '../features/account/presentation/bindings/account_binding.dart';
+import '../features/home/presentation/bindings/home_binding.dart'; // ✅ Import ini
+import '../features/home/presentation/pages/home_page.dart';
+import '../features/course/presentation/pages/course_list_page.dart';
 import '../features/todo/presentation/pages/todo_list_page.dart';
-import '../pages/account_menu_page.dart';
+import '../features/account/presentation/pages/account_menu_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -25,9 +27,11 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // Inject bindings for Course and Todo features
+    // ✅ Inject bindings for ALL features
+    HomeBinding().dependencies();          // ✅ Tambahkan ini
     CourseBinding().dependencies();
     TodoFirebaseBinding().dependencies();
+    AccountBinding().dependencies();
   }
 
   final _pages = const [
@@ -59,6 +63,7 @@ class _MainNavigationState extends State<MainNavigation> {
       label: 'Akun Saya',
     ),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
