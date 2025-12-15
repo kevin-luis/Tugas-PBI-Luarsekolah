@@ -5,6 +5,9 @@ class AppRoutes {
   
   // Splash
   static const String splash = '/';
+
+  //home
+  static const home = '/home';
   
   // Auth routes
   static const String login = '/login';
@@ -21,4 +24,8 @@ class AppRoutes {
   // Todo routes
   static const String todoList = '/todos';
   static const String todoDetail = '/todos/detail';
+  
+  // Account routes
+  static const String accountMenu = '/account';
+  static const String editProfile = '/account/edit-profile';
 }

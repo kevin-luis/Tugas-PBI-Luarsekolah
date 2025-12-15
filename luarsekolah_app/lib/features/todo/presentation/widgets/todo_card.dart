@@ -1,9 +1,7 @@
 // lib/features/todo/presentation/widgets/todo_card.dart
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../domain/entities/todo_entity.dart';
-import '../controllers/todo_controller.dart';
 
 class TodoCard extends StatelessWidget {
   final TodoEntity todo;
@@ -131,7 +129,6 @@ class TodoCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                        // ⚠️ Warning badge for old uncompleted tasks
                         if (isOldTask) ...[
                           const SizedBox(width: 8),
                           Container(
@@ -170,13 +167,6 @@ class TodoCard extends StatelessWidget {
                 ),
               ),
 
-              // ✅ Reminder Button (only for uncompleted todos)
-              if (!todo.completed) ...[
-                const SizedBox(width: 8),
-                _buildReminderButton(context),
-                const SizedBox(width: 8),
-              ],
-
               // Arrow Icon
               Icon(
                 Icons.arrow_forward_ios,
@@ -184,37 +174,6 @@ class TodoCard extends StatelessWidget {
                 color: Colors.grey[400],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// ✅ Reminder Button Widget
-  Widget _buildReminderButton(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          // Get controller and call remindTodo
-          final controller = Get.find<TodoController>();
-          controller.remindTodo(todo);
-        },
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: Colors.orange[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Colors.orange[200]!,
-              width: 1,
-            ),
-          ),
-          child: Icon(
-            Icons.notifications_active,
-            color: Colors.orange[700],
-            size: 18,
           ),
         ),
       ),

@@ -1,36 +1,33 @@
-// user_entity.dart
-class UserEntity {
+// lib/features/account/domain/entities/user_profile_entity.dart
+
+class UserProfileEntity {
   final String id;
   final String name;
   final String email;
   final String? phoneNumber;
-  final String? photoUrl;  // Add this
-  final DateTime createdAt;
+  final String? photoUrl;
 
-  UserEntity({
+  UserProfileEntity({
     required this.id,
     required this.name,
     required this.email,
     this.phoneNumber,
-    this.photoUrl,  // Add this
-    required this.createdAt,
+    this.photoUrl,
   });
 
-  UserEntity copyWith({
+  UserProfileEntity copyWith({
     String? id,
     String? name,
     String? email,
     String? phoneNumber,
-    String? photoUrl,  // Add this
-    DateTime? createdAt,
+    String? photoUrl,
   }) {
-    return UserEntity(
+    return UserProfileEntity(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      photoUrl: photoUrl ?? this.photoUrl,  // Add this
-      createdAt: createdAt ?? this.createdAt,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 }

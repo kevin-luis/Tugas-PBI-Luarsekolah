@@ -3,7 +3,6 @@ import '../entities/todo_entity.dart';
 abstract class TodoRepository {
   Future<List<TodoEntity>> getTodos({bool? completed});
   
-  // ✅ NEW: Pagination methods
   Future<List<TodoEntity>> getTodosPaginated({
     bool? completed,
     int limit = 20,
@@ -15,6 +14,9 @@ abstract class TodoRepository {
   Future<TodoEntity> toggleTodoCompletion(String id);
   Future<bool> deleteTodo(String id);
   
-  // ✅ NEW: Batch create for dummy data
-  Future<void> batchCreateTodos(List<Map<String, dynamic>> todosData);
+  // Stream untuk real-time updates
+  Stream<List<TodoEntity>> getTodosStream({bool? completed});
+  
+  // Delete completed todos
+  Future<int> deleteCompletedTodos();
 }
