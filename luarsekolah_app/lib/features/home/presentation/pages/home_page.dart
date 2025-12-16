@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import '../controllers/home_controller.dart';
-import '../widgets/home_header_widget.dart';
-import '../widgets/banner_carousel_widget.dart';
-import '../widgets/program_menu_widget.dart';
-import '../widgets/voucher_section_widget.dart';
-import '../widgets/popular_classes_widget.dart';
-import '../widgets/subscriptions_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/home_header_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/banner_carousel_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/program_menu_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/voucher_section_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/popular_classes_widget.dart';
+import 'package:luarsekolah_app/features/home/presentation/widgets/subscriptions_widget.dart';
 
 class HomePage extends GetView<HomeController> {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -91,19 +91,19 @@ class HomePage extends GetView<HomeController> {
                     topRight: Radius.circular(24),
                   ),
                 ),
-                child: Column(
+                child: const Column(
                   children: [
-                    const SizedBox(height: 20),
-                    const BannerCarouselWidget(),
-                    const SizedBox(height: 24),
-                    const ProgramMenuWidget(),
-                    const SizedBox(height: 16),
-                    const VoucherSectionWidget(),
-                    const SizedBox(height: 24),
-                    const PopularClassesWidget(),
-                    const SizedBox(height: 24),
-                    const SubscriptionsWidget(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 20),
+                    BannerCarouselWidget(),
+                    SizedBox(height: 24),
+                    ProgramMenuWidget(),
+                    SizedBox(height: 16),
+                    VoucherSectionWidget(),
+                    SizedBox(height: 24),
+                    PopularClassesWidget(),
+                    SizedBox(height: 24),
+                    SubscriptionsWidget(),
+                    SizedBox(height: 24),
                   ],
                 ),
               ),

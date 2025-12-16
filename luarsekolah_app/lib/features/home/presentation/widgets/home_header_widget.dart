@@ -2,15 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class HomeHeaderWidget extends GetView<HomeController> {
   final double progress;
 
   const HomeHeaderWidget({
-    Key? key,
-    required this.progress,
-  }) : super(key: key);
+    required this.progress, super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +81,7 @@ class HomeHeaderWidget extends GetView<HomeController> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(

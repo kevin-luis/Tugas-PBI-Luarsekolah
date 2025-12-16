@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/course_entity.dart';
-import '../controllers/course_list_controller.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/presentation/controllers/course_list_controller.dart';
 
 class CourseCardWidget extends StatelessWidget {
   final CourseEntity course;
@@ -10,11 +10,8 @@ class CourseCardWidget extends StatelessWidget {
   final VoidCallback onDelete;
 
   const CourseCardWidget({
-    Key? key,
-    required this.course,
-    required this.onEdit,
-    required this.onDelete,
-  }) : super(key: key);
+    required this.course, required this.onEdit, required this.onDelete, super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +190,7 @@ class CourseCardWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

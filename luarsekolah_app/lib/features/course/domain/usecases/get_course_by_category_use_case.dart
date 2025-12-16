@@ -1,5 +1,5 @@
-import '../entities/course_entity.dart';
-import '../repositories/course_repository.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/domain/repositories/course_repository.dart';
 
 class GetCoursesByCategoryUseCase {
   final CourseRepository repository;

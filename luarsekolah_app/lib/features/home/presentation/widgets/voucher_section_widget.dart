@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class VoucherSectionWidget extends GetView<HomeController> {
-  const VoucherSectionWidget({Key? key}) : super(key: key);
+  const VoucherSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class VoucherSectionWidget extends GetView<HomeController> {
         border: Border.all(color: Colors.grey[300]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

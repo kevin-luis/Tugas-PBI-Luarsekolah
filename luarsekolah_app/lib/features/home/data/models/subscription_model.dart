@@ -1,7 +1,7 @@
 // lib/features/home/data/models/subscription_model.dart
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/subscription_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/subscription_entity.dart';
 
 class SubscriptionModel extends SubscriptionEntity {
   SubscriptionModel({
@@ -50,10 +50,10 @@ class SubscriptionModel extends SubscriptionEntity {
       'id': id,
       'title': title,
       'subtitle': subtitle,
-      'color': color.value,
-      'gradient_colors': gradientColors.map((c) => c.value).toList(),
+      'color': color.toARGB32(),
+      'gradient_colors': gradientColors.map((c) => c.toARGB32()).toList(),
       'icon': icon.codePoint,
-      'background_color': backgroundColor.value,
+      'background_color': backgroundColor.toARGB32(),
       'total_classes': totalClasses,
     };
   }

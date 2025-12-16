@@ -1,4 +1,4 @@
-import '../repositories/todo_repository.dart';
+import 'package:luarsekolah_app/features/todo/domain/repositories/todo_repository.dart';
 
 class DeleteTodoUseCase {
   final TodoRepository repository;

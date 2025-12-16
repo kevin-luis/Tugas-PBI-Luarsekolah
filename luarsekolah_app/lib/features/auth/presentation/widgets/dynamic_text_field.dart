@@ -37,9 +37,7 @@ class DynamicTextField extends StatefulWidget {
   final void Function(bool)? onValidationChanged;
 
   const DynamicTextField({
-    Key? key,
-    required this.label,
-    required this.controller,
+    required this.label, required this.controller, super.key,
     this.type = FieldType.generic,
     this.rules,
     this.hintText,
@@ -49,7 +47,7 @@ class DynamicTextField extends StatefulWidget {
     this.keyboardType,
     this.inputFormatters,
     this.onValidationChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<DynamicTextField> createState() => _DynamicTextFieldState();

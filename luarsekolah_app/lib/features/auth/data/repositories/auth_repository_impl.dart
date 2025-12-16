@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/error/exceptions.dart';
+import 'package:luarsekolah_app/features/auth/domain/entities/user_entity.dart';
+import 'package:luarsekolah_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:luarsekolah_app/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:luarsekolah_app/core/error/failures.dart';
+import 'package:luarsekolah_app/core/error/exceptions.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;

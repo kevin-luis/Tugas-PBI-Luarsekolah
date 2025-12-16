@@ -1,16 +1,16 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Tambahkan ini
-import '../controllers/auth_controller.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../data/datasources/auth_remote_data_source.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/login_use_case.dart';
-import '../../domain/usecases/register_use_case.dart';
-import '../../domain/usecases/login_with_google_use_case.dart';
-import '../../domain/usecases/logout_use_case.dart';
-import '../../domain/usecases/get_current_user_use_case.dart';
-import '../../domain/usecases/update_user_profile_use_case.dart'; // Tambahkan ini
+import 'package:luarsekolah_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:luarsekolah_app/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:luarsekolah_app/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:luarsekolah_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/login_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/register_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/login_with_google_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/logout_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/update_user_profile_use_case.dart'; // Tambahkan ini
 
 class AuthBinding extends Bindings {
   @override

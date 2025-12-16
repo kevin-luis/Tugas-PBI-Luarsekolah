@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/course_entity.dart';
-import '../../domain/usecases/create_course_use_case.dart';
-import '../../domain/usecases/update_course_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/create_course_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/update_course_use_case.dart';
 
 class CourseFormController extends GetxController {
   final CreateCourseUseCase createCourseUseCase;

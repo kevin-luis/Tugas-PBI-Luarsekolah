@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/auth_controller.dart';
-import '../widgets/auth_widgets.dart';
-import '../../../../core/routes/app_routes.dart';
+import 'package:luarsekolah_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:luarsekolah_app/features/auth/presentation/widgets/auth_widgets.dart';
+import 'package:luarsekolah_app/core/routes/app_routes.dart';
 
 class RegisterPage extends GetView<AuthController> {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {

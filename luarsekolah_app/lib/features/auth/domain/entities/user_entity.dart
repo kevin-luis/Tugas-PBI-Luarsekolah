@@ -11,9 +11,8 @@ class UserEntity {
     required this.id,
     required this.name,
     required this.email,
-    this.phoneNumber,
+    required this.createdAt, this.phoneNumber,
     this.photoUrl,  // Add this
-    required this.createdAt,
   });
 
   UserEntity copyWith({

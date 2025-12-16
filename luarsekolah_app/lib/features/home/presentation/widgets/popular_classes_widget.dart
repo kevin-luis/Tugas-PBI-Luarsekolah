@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class PopularClassesWidget extends GetView<HomeController> {
-  const PopularClassesWidget({Key? key}) : super(key: key);
+  const PopularClassesWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,7 @@ class PopularClassesWidget extends GetView<HomeController> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.15),
+              color: Colors.grey.withValues(alpha: 0.15),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -138,7 +138,7 @@ class PopularClassesWidget extends GetView<HomeController> {
                   Center(
                     child: Icon(
                       classItem.icon,
-                      color: Colors.white.withOpacity(0.35),
+                      color: Colors.white.withValues(alpha: 0.35),
                       size: 56,
                     ),
                   ),

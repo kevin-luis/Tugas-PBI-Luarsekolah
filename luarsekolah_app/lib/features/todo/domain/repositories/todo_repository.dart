@@ -1,4 +1,4 @@
-import '../entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
 
 abstract class TodoRepository {
   Future<List<TodoEntity>> getTodos({bool? completed});

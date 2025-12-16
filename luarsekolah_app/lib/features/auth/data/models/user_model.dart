@@ -1,12 +1,11 @@
-import '../../domain/entities/user_entity.dart';
+import 'package:luarsekolah_app/features/auth/domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   UserModel({
     required super.id,
     required super.name,
     required super.email,
-    super.phoneNumber,
-    required super.createdAt,
+    required super.createdAt, super.phoneNumber,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {

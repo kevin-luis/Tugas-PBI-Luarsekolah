@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../controllers/course_form_controller.dart';
-import '../widgets/form_input_widget.dart';
-import '../widgets/thumbnail_preview_widget.dart';
+import 'package:luarsekolah_app/features/course/presentation/controllers/course_form_controller.dart';
+import 'package:luarsekolah_app/features/course/presentation/widgets/form_input_widget.dart';
+import 'package:luarsekolah_app/features/course/presentation/widgets/thumbnail_preview_widget.dart';
 
 class CourseFormPage extends StatelessWidget {
   final bool isEdit;
 
   const CourseFormPage({
-    Key? key,
+    super.key,
     this.isEdit = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class CourseFormPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Obx(() => DropdownButtonFormField<String>(
-                      value: controller.selectedCategory.value,
+                      initialValue: controller.selectedCategory.value,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),

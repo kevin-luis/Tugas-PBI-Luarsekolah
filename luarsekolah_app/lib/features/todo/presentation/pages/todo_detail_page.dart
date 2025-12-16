@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/todo_entity.dart';
-import '../controllers/todo_controller.dart';
-import '../widgets/create_edit_todo_dialog.dart';
-import '../widgets/reminder_picker_dialog.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/create_edit_todo_dialog.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/reminder_picker_dialog.dart';
 
 class TodoDetailPage extends GetView<TodoController> {
   final String todoId;
 
-  const TodoDetailPage({super.key, required this.todoId});
+  const TodoDetailPage({required this.todoId, super.key});
 
   TodoEntity? get todo => controller.allTodos.firstWhereOrNull((t) => t.id == todoId);
 
@@ -148,14 +148,14 @@ class TodoDetailPage extends GetView<TodoController> {
                   const SizedBox(height: 6),
                   Text(
                     todo.completed
-                        ? 'Todo sudah dikerjakan 🎉'
+                        ? 'Todo sudah dikerjakan ðŸŽ‰'
                         : isAlert
-                            ? 'Sudah terlalu lama belum dikerjakan ⚠️'
+                            ? 'Sudah terlalu lama belum dikerjakan âš ï¸'
                             : 'Masih ada pekerjaan yang belum selesai',
                     style: TextStyle(
                       color: todo.completed
-                          ? Colors.white.withOpacity(0.9)
-                          : textPending.withOpacity(0.8),
+                          ? Colors.white.withValues(alpha: 0.9)
+                          : textPending.withValues(alpha: 0.8),
                       fontSize: 14,
                       height: 1.4,
                     ),

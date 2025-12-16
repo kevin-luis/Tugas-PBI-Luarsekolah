@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/todo_entity.dart';
-import '../controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
 
 class ReminderPickerDialog extends GetView<TodoController> {
   final TodoEntity todo;
 
-  const ReminderPickerDialog({super.key, required this.todo});
+  const ReminderPickerDialog({required this.todo, super.key});
 
   @override
   Widget build(BuildContext context) {

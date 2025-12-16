@@ -1,11 +1,11 @@
 // lib/features/home/data/repositories/home_repository_impl.dart
 
-import '../../domain/entities/banner_entity.dart';
-import '../../domain/entities/program_menu_entity.dart';
-import '../../domain/entities/class_entity.dart';
-import '../../domain/entities/subscription_entity.dart';
-import '../../domain/repositories/home_repository.dart';
-import '../datasources/home_remote_data_source.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/banner_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/program_menu_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/class_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/subscription_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/repositories/home_repository.dart';
+import 'package:luarsekolah_app/features/home/data/datasources/home_remote_data_source.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;

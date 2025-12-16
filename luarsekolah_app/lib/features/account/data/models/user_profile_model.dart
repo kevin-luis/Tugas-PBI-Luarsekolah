@@ -1,6 +1,6 @@
 // lib/features/account/data/models/user_profile_model.dart
 
-import '../../domain/entities/user_profile_entity.dart';
+import 'package:luarsekolah_app/features/account/domain/entities/user_profile_entity.dart';
 
 class UserProfileModel extends UserProfileEntity {
   UserProfileModel({

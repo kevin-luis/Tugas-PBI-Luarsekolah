@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class ProgramMenuWidget extends GetView<HomeController> {
-  const ProgramMenuWidget({Key? key}) : super(key: key);
+  const ProgramMenuWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

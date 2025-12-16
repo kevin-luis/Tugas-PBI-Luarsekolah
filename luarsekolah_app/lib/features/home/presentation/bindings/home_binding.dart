@@ -1,14 +1,14 @@
 // lib/features/home/presentation/bindings/home_binding.dart
 
 import 'package:get/get.dart';
-import '../../data/datasources/home_remote_data_source.dart';
-import '../../data/repositories/home_repository_impl.dart';
-import '../../domain/repositories/home_repository.dart';
-import '../../domain/usecases/get_banners_use_case.dart';
-import '../../domain/usecases/get_programs_use_case.dart';
-import '../../domain/usecases/get_popular_classes_use_case.dart';
-import '../../domain/usecases/get_subscriptions_use_case.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/data/datasources/home_remote_data_source.dart';
+import 'package:luarsekolah_app/features/home/data/repositories/home_repository_impl.dart';
+import 'package:luarsekolah_app/features/home/domain/repositories/home_repository.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_banners_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_programs_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_popular_classes_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_subscriptions_use_case.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class HomeBinding extends Bindings {
   @override

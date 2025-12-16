@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/entities/todo_entity.dart';
+import 'package:flutter/foundation.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
 
 /// Extended TodoModel specifically for Firebase Firestore
 /// Handles Timestamp conversion properly
@@ -41,8 +42,8 @@ class TodoFirebaseModel extends TodoEntity {
         updatedAt: _parseTimestamp(json['updatedAt']),
       );
     } catch (e) {
-      print('[TodoFirebaseModel] Error parsing: $e');
-      print('[TodoFirebaseModel] JSON data: $json');
+      debugPrint('[TodoFirebaseModel] Error parsing: $e');
+      debugPrint('[TodoFirebaseModel] JSON data: $json');
       rethrow;
     }
   }
@@ -74,10 +75,10 @@ class TodoFirebaseModel extends TodoEntity {
         return DateTime.fromMillisecondsSinceEpoch(value);
       }
 
-      print('[TodoFirebaseModel] Unknown date format: ${value.runtimeType}');
+      debugPrint('[TodoFirebaseModel] Unknown date format: ${value.runtimeType}');
       return DateTime.now();
     } catch (e) {
-      print('[TodoFirebaseModel] Error parsing timestamp: $value, error: $e');
+      debugPrint('[TodoFirebaseModel] Error parsing timestamp: $value, error: $e');
       return DateTime.now();
     }
   }

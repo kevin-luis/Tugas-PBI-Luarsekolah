@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../domain/entities/banner_entity.dart';
-import '../../domain/entities/program_menu_entity.dart';
-import '../../domain/entities/class_entity.dart';
-import '../../domain/entities/subscription_entity.dart';
-import '../../domain/usecases/get_banners_use_case.dart';
-import '../../domain/usecases/get_programs_use_case.dart';
-import '../../domain/usecases/get_popular_classes_use_case.dart';
-import '../../domain/usecases/get_subscriptions_use_case.dart';
+import 'package:luarsekolah_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/banner_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/program_menu_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/class_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/subscription_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_banners_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_programs_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_popular_classes_use_case.dart';
+import 'package:luarsekolah_app/features/home/domain/usecases/get_subscriptions_use_case.dart';
 
 class HomeController extends GetxController {
   final GetBannersUseCase getBannersUseCase;

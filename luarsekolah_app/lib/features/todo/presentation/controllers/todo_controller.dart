@@ -1,15 +1,16 @@
 // lib/features/todo/presentation/controllers/todo_controller.dart
 
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/todo_entity.dart';
-import '../../domain/usecases/get_todos_use_case.dart';
-import '../../domain/usecases/get_todos_paginated_use_case.dart';
-import '../../domain/usecases/create_todo_use_case.dart';
-import '../../domain/usecases/update_todo_use_case.dart';
-import '../../domain/usecases/toggle_todo_use_case.dart';
-import '../../domain/usecases/delete_todo_use_case.dart';
-import '../../../../core/services/notification_service.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/get_todos_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/get_todos_paginated_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/create_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/update_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/toggle_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/delete_todo_use_case.dart';
+import 'package:luarsekolah_app/core/services/notification_service.dart';
 
 enum TodoFilter { all, active, completed }
 
@@ -89,9 +90,9 @@ class TodoController extends GetxController {
         _hasMoreData.value = false;
       }
 
-      print('[TodoController] Loaded ${todos.length} todos initially');
+      developer.log('Loaded ${todos.length} todos initially', name: 'TodoController');
     } catch (e) {
-      print('[TodoController] Error loading todos: $e');
+      developer.log('Error loading todos', name: 'TodoController', error: e);
       _errorMessage.value = e.toString();
       
       Get.snackbar(
@@ -126,9 +127,9 @@ class TodoController extends GetxController {
 
       _allTodos.addAll(newTodos);
 
-      print('[TodoController] Loaded ${newTodos.length} more todos. Total: ${_allTodos.length}');
+      developer.log('Loaded ${newTodos.length} more todos. Total: ${_allTodos.length}', name: 'TodoController');
     } catch (e) {
-      print('[TodoController] Error loading more todos: $e');
+      developer.log('Error loading more todos', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -161,9 +162,9 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
 
-      print('[TodoController] Todo created: ${todo.text}');
+      developer.log('Todo created: ${todo.text}', name: 'TodoController');
     } catch (e) {
-      print('[TodoController] Error creating todo: $e');
+      developer.log('Error creating todo', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -202,7 +203,7 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      print('[TodoController] Error updating todo: $e');
+      developer.log('Error updating todo', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -237,7 +238,7 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      print('[TodoController] Error toggling todo: $e');
+      developer.log('Error toggling todo', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -265,7 +266,7 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      print('[TodoController] Error deleting todo: $e');
+      developer.log('Error deleting todo', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -303,9 +304,9 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
 
-      print('[TodoController] ✅ Reminder scheduled for: ${todo.text} at $scheduledDate');
+      developer.log('✅ Reminder scheduled for: ${todo.text} at $scheduledDate', name: 'TodoController');
     } catch (e) {
-      print('[TodoController] Error scheduling reminder: $e');
+      developer.log('Error scheduling reminder', name: 'TodoController', error: e);
       
       Get.snackbar(
         'Error',
@@ -332,7 +333,7 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      print('[TodoController] Error cancelling reminder: $e');
+      developer.log('Error cancelling reminder', name: 'TodoController', error: e);
     }
   }
 
@@ -350,7 +351,7 @@ class TodoController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      print('[TodoController] Error cancelling reminders: $e');
+      developer.log('Error cancelling reminders', name: 'TodoController', error: e);
     }
   }
 
@@ -360,7 +361,7 @@ class TodoController extends GetxController {
       final pending = await notificationService.getPendingNotifications();
       return pending.length;
     } catch (e) {
-      print('[TodoController] Error getting pending notifications: $e');
+      developer.log('Error getting pending notifications', name: 'TodoController', error: e);
       return 0;
     }
   }

@@ -1,7 +1,7 @@
 // lib/features/home/data/models/program_menu_model.dart
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/program_menu_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/program_menu_entity.dart';
 
 class ProgramMenuModel extends ProgramMenuEntity {
   ProgramMenuModel({
@@ -34,7 +34,7 @@ class ProgramMenuModel extends ProgramMenuEntity {
       'id': id,
       'label': label,
       'icon': icon.codePoint,
-      'color': color.value,
+      'color': color.toARGB32(),
       'route': route,
     };
   }

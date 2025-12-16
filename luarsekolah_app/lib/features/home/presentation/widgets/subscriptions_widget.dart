@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class SubscriptionsWidget extends GetView<HomeController> {
-  const SubscriptionsWidget({Key? key}) : super(key: key);
+  const SubscriptionsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class SubscriptionsWidget extends GetView<HomeController> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.15),
+              color: Colors.grey.withValues(alpha: 0.15),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -126,7 +126,7 @@ class SubscriptionsWidget extends GetView<HomeController> {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -138,7 +138,7 @@ class SubscriptionsWidget extends GetView<HomeController> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                     ),

@@ -7,11 +7,8 @@ class PrimaryButton extends StatefulWidget {
   final Future<void> Function() onPressed;
 
   const PrimaryButton({
-    super.key,
-    required this.label,
+    required this.label, required this.enabled, required this.onPressed, super.key,
     this.loadingText,
-    required this.enabled,
-    required this.onPressed,
   });
 
   @override
