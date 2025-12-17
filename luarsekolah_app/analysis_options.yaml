@@ -1,1 +1,41 @@
+# analysis_options.yaml
+
+# Include default Flutter lints
 include: package:flutter_lints/flutter.yaml
+
+# Additional lint rules (optional)
+linter:
+  rules:
+    # Dart style guide
+    - always_declare_return_types
+    - always_put_required_named_parameters_first
+    - always_use_package_imports
+    - avoid_print
+    - avoid_unnecessary_containers
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_fields
+    - prefer_single_quotes
+    - sort_child_properties_last
+    - use_key_in_widget_constructors
+    
+    # Additional recommended rules
+    - camel_case_types
+    - library_names
+    - file_names
+    - non_constant_identifier_names
+    - constant_identifier_names
+
+# Analyzer settings
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  
+  errors:
+    # Treat missing required parameters as errors
+    missing_required_param: error
+    # Treat missing return as errors
+    missing_return: error
+    # Warning for TODOs
+    todo: ignore

@@ -1,7 +1,7 @@
 // lib/features/todo/presentation/widgets/todo_card.dart
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
 
 class TodoCard extends StatelessWidget {
   final TodoEntity todo;
@@ -9,10 +9,7 @@ class TodoCard extends StatelessWidget {
   final VoidCallback onToggle;
 
   const TodoCard({
-    super.key,
-    required this.todo,
-    required this.onTap,
-    required this.onToggle,
+    required this.todo, required this.onTap, required this.onToggle, super.key,
   });
 
   @override
@@ -28,9 +25,9 @@ class TodoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: todo.completed
-              ? const Color(0xFF26A69A).withOpacity(0.3)
+              ? const Color(0xFF26A69A).withValues(alpha: 0.3)
               : isOldTask
-                  ? Colors.orange.withOpacity(0.4)
+                  ? Colors.orange.withValues(alpha: 0.4)
                   : Colors.transparent,
           width: 2,
         ),

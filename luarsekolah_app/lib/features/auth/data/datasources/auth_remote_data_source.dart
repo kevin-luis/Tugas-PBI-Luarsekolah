@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_model.dart';
-import '../../../../core/error/exceptions.dart';
+import 'package:luarsekolah_app/features/auth/data/models/user_model.dart';
+import 'package:luarsekolah_app/core/error/exceptions.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password);

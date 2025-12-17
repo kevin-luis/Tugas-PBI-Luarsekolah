@@ -9,11 +9,8 @@ class LoginInfoBox extends StatelessWidget {
   final Color? backgroundColor;
 
   const LoginInfoBox({
-    super.key,
+    required this.questionText, required this.actionText, required this.onTap, super.key,
     this.emoji = '👋',
-    required this.questionText,
-    required this.actionText,
-    required this.onTap,
     this.backgroundColor,
   });
 

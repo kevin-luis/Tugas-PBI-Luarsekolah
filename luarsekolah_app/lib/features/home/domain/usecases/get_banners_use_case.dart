@@ -1,7 +1,7 @@
 // lib/features/home/domain/usecases/get_banners_use_case.dart
 
-import '../entities/banner_entity.dart';
-import '../repositories/home_repository.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/banner_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/repositories/home_repository.dart';
 
 class GetBannersUseCase {
   final HomeRepository repository;

@@ -13,17 +13,14 @@ class FormInputWidget extends StatelessWidget {
   final void Function(String)? onChanged;
 
   const FormInputWidget({
-    Key? key,
-    required this.label,
-    required this.controller,
-    required this.hintText,
+    required this.label, required this.controller, required this.hintText, super.key,
     this.helperText,
     this.keyboardType,
     this.inputFormatters,
     this.prefixIcon,
     this.validator,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

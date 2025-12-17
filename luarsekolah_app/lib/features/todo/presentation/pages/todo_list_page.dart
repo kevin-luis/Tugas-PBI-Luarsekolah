@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/todo_controller.dart';
-import '../widgets/todo_filter_tabs.dart';
-import '../widgets/todo_statistics_bar.dart';
-import '../widgets/todo_card.dart';
-import '../widgets/create_edit_todo_dialog.dart';
-import 'todo_detail_page.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/todo_filter_tabs.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/todo_statistics_bar.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/todo_card.dart';
+import 'package:luarsekolah_app/features/todo/presentation/widgets/create_edit_todo_dialog.dart';
+import 'package:luarsekolah_app/features/todo/presentation/pages/todo_detail_page.dart';
 
 class TodoListPage extends GetView<TodoController> {
   const TodoListPage({super.key});

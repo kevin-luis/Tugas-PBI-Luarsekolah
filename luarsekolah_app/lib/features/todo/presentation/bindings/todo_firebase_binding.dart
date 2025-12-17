@@ -3,16 +3,16 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../data/repositories/todo_firebase_repository_impl.dart';
-import '../../domain/repositories/todo_repository.dart';
-import '../../domain/usecases/get_todos_use_case.dart';
-import '../../domain/usecases/get_todos_paginated_use_case.dart';
-import '../../domain/usecases/create_todo_use_case.dart';
-import '../../domain/usecases/update_todo_use_case.dart';
-import '../../domain/usecases/toggle_todo_use_case.dart';
-import '../../domain/usecases/delete_todo_use_case.dart';
-import '../controllers/todo_controller.dart';
-import '../../../../core/services/notification_service.dart';
+import 'package:luarsekolah_app/features/todo/data/repositories/todo_firebase_repository_impl.dart';
+import 'package:luarsekolah_app/features/todo/domain/repositories/todo_repository.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/get_todos_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/get_todos_paginated_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/create_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/update_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/toggle_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/domain/usecases/delete_todo_use_case.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
+import 'package:luarsekolah_app/core/services/notification_service.dart';
 
 class TodoFirebaseBinding extends Bindings {
   @override

@@ -2,7 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../domain/entities/user_profile_entity.dart';
+import 'package:luarsekolah_app/features/account/domain/entities/user_profile_entity.dart';
 
 class ProfileAvatar extends StatelessWidget {
   final UserProfileEntity? user;
@@ -10,11 +10,9 @@ class ProfileAvatar extends StatelessWidget {
   final VoidCallback onEditPressed;
 
   const ProfileAvatar({
-    Key? key,
-    required this.user,
+    required this.user, required this.onEditPressed, super.key,
     this.imagePath,
-    required this.onEditPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

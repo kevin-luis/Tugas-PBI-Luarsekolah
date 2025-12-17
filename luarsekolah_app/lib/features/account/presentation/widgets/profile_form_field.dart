@@ -10,13 +10,10 @@ class ProfileFormField extends StatelessWidget {
   final TextInputType? keyboardType;
 
   const ProfileFormField({
-    Key? key,
-    required this.label,
-    required this.controller,
-    required this.hint,
+    required this.label, required this.controller, required this.hint, super.key,
     this.enabled = true,
     this.keyboardType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

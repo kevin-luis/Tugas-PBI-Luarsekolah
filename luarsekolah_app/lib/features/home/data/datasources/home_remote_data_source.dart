@@ -1,10 +1,10 @@
 // lib/features/home/data/datasources/home_remote_data_source.dart
 
 import 'package:flutter/material.dart';
-import '../models/banner_model.dart';
-import '../models/program_menu_model.dart';
-import '../models/class_model.dart';
-import '../models/subscription_model.dart';
+import 'package:luarsekolah_app/features/home/data/models/banner_model.dart';
+import 'package:luarsekolah_app/features/home/data/models/program_menu_model.dart';
+import 'package:luarsekolah_app/features/home/data/models/class_model.dart';
+import 'package:luarsekolah_app/features/home/data/models/subscription_model.dart';
 
 abstract class HomeRemoteDataSource {
   Future<List<BannerModel>> getBanners();

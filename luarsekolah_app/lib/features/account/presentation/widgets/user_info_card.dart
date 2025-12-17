@@ -1,15 +1,14 @@
 // lib/features/account/presentation/widgets/user_info_card.dart
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/user_profile_entity.dart';
+import 'package:luarsekolah_app/features/account/domain/entities/user_profile_entity.dart';
 
 class UserInfoCard extends StatelessWidget {
   final UserProfileEntity user;
 
   const UserInfoCard({
-    Key? key,
-    required this.user,
-  }) : super(key: key);
+    required this.user, super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

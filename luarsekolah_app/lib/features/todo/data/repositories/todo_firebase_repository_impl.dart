@@ -1,8 +1,9 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../domain/entities/todo_entity.dart';
-import '../../domain/repositories/todo_repository.dart';
-import '../models/todo_firebase_model.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/domain/repositories/todo_repository.dart';
+import 'package:luarsekolah_app/features/todo/data/models/todo_firebase_model.dart';
 
 class TodoFirebaseRepositoryImpl implements TodoRepository {
   final FirebaseFirestore _firestore;
@@ -25,7 +26,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
   @override
   Future<List<TodoEntity>> getTodos({bool? completed}) async {
     try {
-      print('[FirebaseTodoRepository] Fetching todos for user: ${_auth.currentUser?.uid}');
+      developer.log('Fetching todos for user: ${_auth.currentUser?.uid}', name: 'TodoRepository');
 
       Query query = _getUserTodosCollection().orderBy('createdAt', descending: true);
 
@@ -34,7 +35,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       }
 
       final snapshot = await query.get();
-      print('[FirebaseTodoRepository] Retrieved ${snapshot.docs.length} todos');
+      developer.log('Retrieved ${snapshot.docs.length} todos', name: 'TodoRepository');
 
       final todos = snapshot.docs.map((doc) {
         try {
@@ -42,18 +43,17 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
             doc as DocumentSnapshot<Map<String, dynamic>>
           ).toEntity();
         } catch (e) {
-          print('[FirebaseTodoRepository] Error parsing todo ${doc.id}: $e');
+          developer.log('Error parsing todo ${doc.id}', name: 'TodoRepository', error: e);
           return null;
         }
       }).whereType<TodoEntity>().toList();
 
       return todos;
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] FirebaseException: ${e.code} - ${e.message}');
+      developer.log('FirebaseException: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e, stackTrace) {
-      print('[FirebaseTodoRepository] Error: $e');
-      print('[FirebaseTodoRepository] StackTrace: $stackTrace');
+      developer.log('Error fetching todos', name: 'TodoRepository', error: e, stackTrace: stackTrace);
       throw Exception('Gagal memuat todo: $e');
     }
   }
@@ -65,7 +65,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
     String? lastDocumentId,
   }) async {
     try {
-      print('[FirebaseTodoRepository] Fetching paginated todos (limit: $limit, lastDoc: $lastDocumentId)');
+      developer.log('Fetching paginated todos (limit: $limit, lastDoc: $lastDocumentId)', name: 'TodoRepository');
 
       Query query = _getUserTodosCollection()
           .orderBy('createdAt', descending: true)
@@ -86,7 +86,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       }
 
       final snapshot = await query.get();
-      print('[FirebaseTodoRepository] Retrieved ${snapshot.docs.length} paginated todos');
+      developer.log('Retrieved ${snapshot.docs.length} paginated todos', name: 'TodoRepository');
 
       final todos = snapshot.docs.map((doc) {
         try {
@@ -94,18 +94,17 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
             doc as DocumentSnapshot<Map<String, dynamic>>
           ).toEntity();
         } catch (e) {
-          print('[FirebaseTodoRepository] Error parsing todo ${doc.id}: $e');
+          developer.log('Error parsing todo ${doc.id}', name: 'TodoRepository', error: e);
           return null;
         }
       }).whereType<TodoEntity>().toList();
 
       return todos;
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] FirebaseException: ${e.code} - ${e.message}');
+      developer.log('FirebaseException: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e, stackTrace) {
-      print('[FirebaseTodoRepository] Error: $e');
-      print('[FirebaseTodoRepository] StackTrace: $stackTrace');
+      developer.log('Error fetching paginated todos', name: 'TodoRepository', error: e, stackTrace: stackTrace);
       throw Exception('Gagal memuat todo: $e');
     }
   }
@@ -124,7 +123,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
         'updatedAt': Timestamp.fromDate(now),
       };
 
-      print('[FirebaseTodoRepository] Creating todo: $todoData');
+      developer.log('Creating todo: $todoData', name: 'TodoRepository');
 
       final docRef = await _getUserTodosCollection().add(todoData);
       final doc = await docRef.get();
@@ -133,10 +132,10 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
         doc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] Create error: ${e.code} - ${e.message}');
+      developer.log('Create error: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e) {
-      print('[FirebaseTodoRepository] Error creating todo: $e');
+      developer.log('Error creating todo', name: 'TodoRepository', error: e);
       throw Exception('Gagal membuat todo: $e');
     }
   }
@@ -155,7 +154,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       if (text != null) updateData['text'] = text;
       if (completed != null) updateData['completed'] = completed;
 
-      print('[FirebaseTodoRepository] Updating todo $id: $updateData');
+      developer.log('Updating todo $id: $updateData', name: 'TodoRepository');
 
       await _getUserTodosCollection().doc(id).update(updateData);
       final doc = await _getUserTodosCollection().doc(id).get();
@@ -168,10 +167,10 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
         doc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] Update error: ${e.code} - ${e.message}');
+      developer.log('Update error: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e) {
-      print('[FirebaseTodoRepository] Error updating todo: $e');
+      developer.log('Error updating todo', name: 'TodoRepository', error: e);
       throw Exception('Gagal mengupdate todo: $e');
     }
   }
@@ -179,7 +178,7 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
   @override
   Future<TodoEntity> toggleTodoCompletion(String id) async {
     try {
-      print('[FirebaseTodoRepository] Toggling todo $id');
+      developer.log('Toggling todo $id', name: 'TodoRepository');
 
       final doc = await _getUserTodosCollection().doc(id).get();
       
@@ -201,10 +200,10 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
         updatedDoc as DocumentSnapshot<Map<String, dynamic>>
       ).toEntity();
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] Toggle error: ${e.code} - ${e.message}');
+      developer.log('Toggle error: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e) {
-      print('[FirebaseTodoRepository] Error toggling todo: $e');
+      developer.log('Error toggling todo', name: 'TodoRepository', error: e);
       throw Exception('Gagal toggle todo: $e');
     }
   }
@@ -212,15 +211,15 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
   @override
   Future<bool> deleteTodo(String id) async {
     try {
-      print('[FirebaseTodoRepository] Deleting todo $id');
+      developer.log('Deleting todo $id', name: 'TodoRepository');
       await _getUserTodosCollection().doc(id).delete();
-      print('[FirebaseTodoRepository] Todo deleted successfully');
+      developer.log('Todo deleted successfully', name: 'TodoRepository');
       return true;
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] Delete error: ${e.code} - ${e.message}');
+      developer.log('Delete error: ${e.code} - ${e.message}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e) {
-      print('[FirebaseTodoRepository] Error deleting todo: $e');
+      developer.log('Error deleting todo', name: 'TodoRepository', error: e);
       throw Exception('Gagal menghapus todo: $e');
     }
   }
@@ -241,13 +240,13 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
               doc as DocumentSnapshot<Map<String, dynamic>>
             ).toEntity();
           } catch (e) {
-            print('[FirebaseTodoRepository] Error parsing todo in stream: $e');
+            developer.log('Error parsing todo in stream', name: 'TodoRepository', error: e);
             return null;
           }
         }).whereType<TodoEntity>().toList();
       });
     } catch (e) {
-      print('[FirebaseTodoRepository] Error creating stream: $e');
+      developer.log('Error creating stream', name: 'TodoRepository', error: e);
       throw Exception('Gagal membuat stream: $e');
     }
   }
@@ -265,14 +264,14 @@ class TodoFirebaseRepositoryImpl implements TodoRepository {
       }
 
       await batch.commit();
-      print('[FirebaseTodoRepository] Deleted ${snapshot.docs.length} completed todos');
+      developer.log('Deleted ${snapshot.docs.length} completed todos', name: 'TodoRepository');
       
       return snapshot.docs.length;
     } on FirebaseException catch (e) {
-      print('[FirebaseTodoRepository] Batch delete error: ${e.code}');
+      developer.log('Batch delete error: ${e.code}', name: 'TodoRepository', error: e);
       throw Exception(_handleFirebaseError(e));
     } catch (e) {
-      print('[FirebaseTodoRepository] Error in batch delete: $e');
+      developer.log('Error in batch delete', name: 'TodoRepository', error: e);
       throw Exception('Gagal menghapus todos: $e');
     }
   }

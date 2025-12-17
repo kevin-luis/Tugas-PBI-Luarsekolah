@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import '../../data/repositories/course_repository_impl.dart';
-import '../../domain/repositories/course_repository.dart';
-import '../../domain/usecases/create_course_use_case.dart';
-import '../../domain/usecases/delete_course_use_case.dart';
-import '../../domain/usecases/get_all_courses_use_case.dart';
-import '../../domain/usecases/update_course_use_case.dart';
-import '../controllers/course_form_controller.dart';
-import '../controllers/course_list_controller.dart';
+import 'package:luarsekolah_app/features/course/data/repositories/course_repository_impl.dart';
+import 'package:luarsekolah_app/features/course/domain/repositories/course_repository.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/create_course_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/delete_course_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/get_all_courses_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/update_course_use_case.dart';
+import 'package:luarsekolah_app/features/course/presentation/controllers/course_form_controller.dart';
+import 'package:luarsekolah_app/features/course/presentation/controllers/course_list_controller.dart';
 
 class CourseBinding extends Bindings {
   @override

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/course_list_controller.dart';
-import '../widgets/course_card_widget.dart';
+import 'package:luarsekolah_app/features/course/presentation/controllers/course_list_controller.dart';
+import 'package:luarsekolah_app/features/course/presentation/widgets/course_card_widget.dart';
 
 class CourseListPage extends StatelessWidget {
-  const CourseListPage({Key? key}) : super(key: key);
+  const CourseListPage({super.key});
 
   @override
   Widget build(BuildContext context) {

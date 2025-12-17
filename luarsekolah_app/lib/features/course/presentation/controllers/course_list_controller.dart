@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../domain/entities/course_entity.dart';
-import '../../domain/usecases/get_all_courses_use_case.dart';
-import '../../domain/usecases/delete_course_use_case.dart';
+import 'package:luarsekolah_app/core/routes/app_routes.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/get_all_courses_use_case.dart';
+import 'package:luarsekolah_app/features/course/domain/usecases/delete_course_use_case.dart';
 
 class CourseListController extends GetxController
     with GetSingleTickerProviderStateMixin {

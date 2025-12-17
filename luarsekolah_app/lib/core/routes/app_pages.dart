@@ -1,23 +1,23 @@
 // lib/core/routes/app_pages.dart
 
 import 'package:get/get.dart';
-import '../../features/auth/presentation/bindings/auth_binding.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
-import '../../features/course/presentation/bindings/course_binding.dart';
-import '../../features/course/presentation/pages/course_list_page.dart';
-import '../../features/course/presentation/pages/course_form_page.dart';
-import '../../features/todo/presentation/bindings/todo_firebase_binding.dart';
-import '../../features/todo/presentation/pages/todo_list_page.dart';
-import '../../features/todo/presentation/pages/todo_detail_page.dart';
-import '../../features/account/presentation/bindings/account_binding.dart';
-import '../../features/account/presentation/pages/account_menu_page.dart';
-import '../../features/account/presentation/pages/edit_profile_page.dart';
-import '../../features/home/presentation/bindings/home_binding.dart';
-import '../../features/home/presentation/pages/home_page.dart';
-import '../../pages/main_navigation.dart';
-import '../../pages/splash_screen.dart';
-import 'app_routes.dart';
+import 'package:luarsekolah_app/features/auth/presentation/bindings/auth_binding.dart';
+import 'package:luarsekolah_app/features/auth/presentation/pages/login_page.dart';
+import 'package:luarsekolah_app/features/auth/presentation/pages/register_page.dart';
+import 'package:luarsekolah_app/features/course/presentation/bindings/course_binding.dart';
+import 'package:luarsekolah_app/features/course/presentation/pages/course_list_page.dart';
+import 'package:luarsekolah_app/features/course/presentation/pages/course_form_page.dart';
+import 'package:luarsekolah_app/features/todo/presentation/bindings/todo_firebase_binding.dart';
+import 'package:luarsekolah_app/features/todo/presentation/pages/todo_list_page.dart';
+import 'package:luarsekolah_app/features/todo/presentation/pages/todo_detail_page.dart';
+import 'package:luarsekolah_app/features/account/presentation/bindings/account_binding.dart';
+import 'package:luarsekolah_app/features/account/presentation/pages/account_menu_page.dart';
+import 'package:luarsekolah_app/features/account/presentation/pages/edit_profile_page.dart';
+import 'package:luarsekolah_app/features/home/presentation/bindings/home_binding.dart';
+import 'package:luarsekolah_app/features/home/presentation/pages/home_page.dart';
+import 'package:luarsekolah_app/pages/main_navigation.dart';
+import 'package:luarsekolah_app/pages/splash_screen.dart';
+import 'package:luarsekolah_app/core/routes/app_routes.dart';
 
 class AppPages {
   AppPages._();

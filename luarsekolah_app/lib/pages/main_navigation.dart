@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
-import '../features/todo/presentation/bindings/todo_firebase_binding.dart';
-import '../features/course/presentation/bindings/course_binding.dart';
-import '../features/account/presentation/bindings/account_binding.dart';
-import '../features/home/presentation/bindings/home_binding.dart'; // ✅ Import ini
-import '../features/home/presentation/pages/home_page.dart';
-import '../features/course/presentation/pages/course_list_page.dart';
-import '../features/todo/presentation/pages/todo_list_page.dart';
-import '../features/account/presentation/pages/account_menu_page.dart';
+import 'package:luarsekolah_app/features/todo/presentation/bindings/todo_firebase_binding.dart';
+import 'package:luarsekolah_app/features/course/presentation/bindings/course_binding.dart';
+import 'package:luarsekolah_app/features/account/presentation/bindings/account_binding.dart';
+import 'package:luarsekolah_app/features/home/presentation/bindings/home_binding.dart';
+import 'package:luarsekolah_app/features/home/presentation/pages/home_page.dart';
+import 'package:luarsekolah_app/features/course/presentation/pages/course_list_page.dart';
+import 'package:luarsekolah_app/features/todo/presentation/pages/todo_list_page.dart';
+import 'package:luarsekolah_app/features/account/presentation/pages/account_menu_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -27,8 +27,8 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // ✅ Inject bindings for ALL features
-    HomeBinding().dependencies();          // ✅ Tambahkan ini
+    // Inject bindings for ALL features
+    HomeBinding().dependencies();
     CourseBinding().dependencies();
     TodoFirebaseBinding().dependencies();
     AccountBinding().dependencies();
@@ -83,7 +83,7 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: Colors.white,
-          indicatorColor: primaryColor.withOpacity(0.15),
+          indicatorColor: primaryColor.withValues(alpha: 0.15),
           iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
               color: states.contains(WidgetState.selected)
                   ? primaryColor

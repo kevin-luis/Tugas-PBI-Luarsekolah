@@ -1,7 +1,7 @@
 // lib/features/todo/domain/usecases/get_todos_paginated_use_case.dart
 
-import '../entities/todo_entity.dart';
-import '../repositories/todo_repository.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/domain/repositories/todo_repository.dart';
 
 class GetTodosPaginatedUseCase {
   final TodoRepository repository;

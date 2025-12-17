@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
 
 class TodoFilterTabs extends GetView<TodoController> {
   const TodoFilterTabs({super.key});
@@ -59,7 +59,7 @@ class TodoFilterTabs extends GetView<TodoController> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -92,7 +92,7 @@ class TodoFilterTabs extends GetView<TodoController> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFF26A69A)
-                      : Colors.white.withOpacity(0.3),
+                      : Colors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

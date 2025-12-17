@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import '../features/auth/presentation/controllers/auth_controller.dart';
-import '../core/routes/app_routes.dart';
+import 'package:luarsekolah_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:luarsekolah_app/core/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();

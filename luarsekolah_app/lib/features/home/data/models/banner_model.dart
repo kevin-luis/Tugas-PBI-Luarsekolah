@@ -1,6 +1,6 @@
 // lib/features/home/data/models/banner_model.dart
 
-import '../../domain/entities/banner_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/banner_entity.dart';
 
 class BannerModel extends BannerEntity {
   BannerModel({

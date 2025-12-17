@@ -5,8 +5,7 @@ class MainTitle extends StatelessWidget {
   final String subtitle;
 
   const MainTitle({
-    super.key,
-    required this.title,
+    required this.title, super.key,
     this.subtitle = 'Satu akun untuk akses Luarsekolah dan BelajarBekerja',
   });
 

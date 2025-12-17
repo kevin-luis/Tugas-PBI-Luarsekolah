@@ -1,9 +1,9 @@
 // lib/features/account/presentation/controllers/account_controller.dart
 
 import 'package:get/get.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../domain/entities/user_profile_entity.dart';
-import '../../domain/usecases/update_profile_use_case.dart';
+import 'package:luarsekolah_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:luarsekolah_app/features/account/domain/entities/user_profile_entity.dart';
+import 'package:luarsekolah_app/features/account/domain/usecases/update_profile_use_case.dart';
 
 class AccountController extends GetxController {
   final AuthController authController;

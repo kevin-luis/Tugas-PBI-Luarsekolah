@@ -1,7 +1,7 @@
 // lib/features/home/domain/usecases/get_subscriptions_use_case.dart
 
-import '../entities/subscription_entity.dart';
-import '../repositories/home_repository.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/subscription_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/repositories/home_repository.dart';
 
 class GetSubscriptionsUseCase {
   final HomeRepository repository;

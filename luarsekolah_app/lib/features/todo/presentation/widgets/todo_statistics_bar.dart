@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
 
 class TodoStatisticsBar extends GetView<TodoController> {
   const TodoStatisticsBar({super.key});
@@ -24,7 +24,7 @@ class TodoStatisticsBar extends GetView<TodoController> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF26A69A).withOpacity(0.3),
+              color: const Color(0xFF26A69A).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -58,7 +58,7 @@ class TodoStatisticsBar extends GetView<TodoController> {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: total > 0 ? completed / total : 0,
-                backgroundColor: Colors.white.withOpacity(0.3),
+                backgroundColor: Colors.white.withValues(alpha: 0.3),
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                 minHeight: 8,
               ),
@@ -67,7 +67,7 @@ class TodoStatisticsBar extends GetView<TodoController> {
             Text(
               '$percentage% tercapai',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 12,
               ),
             ),

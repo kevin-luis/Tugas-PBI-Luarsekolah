@@ -1,7 +1,7 @@
 // lib/features/home/data/models/class_model.dart
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/class_entity.dart';
+import 'package:luarsekolah_app/features/home/domain/entities/class_entity.dart';
 
 class ClassModel extends ClassEntity {
   ClassModel({
@@ -41,7 +41,7 @@ class ClassModel extends ClassEntity {
       'title': title,
       'price': price,
       'rating': rating,
-      'color': color.value,
+      'color': color.toARGB32(),
       'icon': icon.codePoint,
       'category': category,
       'total_students': totalStudents,

@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
-import '../controllers/account_controller.dart';
-import '../widgets/profile_avatar.dart';
-import '../widgets/profile_form_field.dart';
+import 'package:luarsekolah_app/features/account/presentation/controllers/account_controller.dart';
+import 'package:luarsekolah_app/features/account/presentation/widgets/profile_avatar.dart';
+import 'package:luarsekolah_app/features/account/presentation/widgets/profile_form_field.dart';
 
 class EditProfilePage extends GetView<AccountController> {
-  const EditProfilePage({Key? key}) : super(key: key);
+  const EditProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {

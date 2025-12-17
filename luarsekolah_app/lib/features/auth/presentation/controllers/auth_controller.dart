@@ -1,13 +1,13 @@
 // lib/features/auth/presentation/controllers/auth_controller.dart
 import 'package:get/get.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/usecases/login_use_case.dart';
-import '../../domain/usecases/register_use_case.dart';
-import '../../domain/usecases/login_with_google_use_case.dart';
-import '../../domain/usecases/logout_use_case.dart';
-import '../../domain/usecases/get_current_user_use_case.dart';
-import '../../domain/usecases/update_user_profile_use_case.dart';
-import '../../../../core/error/failures.dart';
+import 'package:luarsekolah_app/features/auth/domain/entities/user_entity.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/login_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/register_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/login_with_google_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/logout_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:luarsekolah_app/features/auth/domain/usecases/update_user_profile_use_case.dart';
+import 'package:luarsekolah_app/core/error/failures.dart';
 
 class AuthController extends GetxController {
   final LoginUseCase loginUseCase;

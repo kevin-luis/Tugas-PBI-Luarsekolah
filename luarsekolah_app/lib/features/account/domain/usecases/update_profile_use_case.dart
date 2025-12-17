@@ -1,6 +1,6 @@
 // lib/features/account/domain/usecases/update_profile_usecase.dart
 
-import '../repositories/account_repository.dart';
+import 'package:luarsekolah_app/features/account/domain/repositories/account_repository.dart';
 
 class UpdateProfileUseCase {
   final AccountRepository repository;

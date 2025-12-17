@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/account_controller.dart';
-import 'edit_profile_page.dart';
-import '../widgets/user_info_card.dart';
-import '../widgets/logout_dialog.dart';
+import 'package:luarsekolah_app/features/account/presentation/controllers/account_controller.dart';
+import 'package:luarsekolah_app/features/account/presentation/pages/edit_profile_page.dart';
+import 'package:luarsekolah_app/features/account/presentation/widgets/user_info_card.dart';
+import 'package:luarsekolah_app/features/account/presentation/widgets/logout_dialog.dart';
 
 class AccountMenuPage extends GetView<AccountController> {
-  const AccountMenuPage({Key? key}) : super(key: key);
+  const AccountMenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class AccountMenuPage extends GetView<AccountController> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF26A69A).withOpacity(0.1),
+                        color: const Color(0xFF26A69A).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
@@ -62,7 +62,7 @@ class AccountMenuPage extends GetView<AccountController> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(

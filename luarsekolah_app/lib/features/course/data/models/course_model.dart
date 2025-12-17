@@ -1,4 +1,4 @@
-import '../../domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
 
 class CourseModel extends CourseEntity {
   const CourseModel({

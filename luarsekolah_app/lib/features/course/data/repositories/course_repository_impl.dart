@@ -1,7 +1,8 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
-import '../../domain/entities/course_entity.dart';
-import '../../domain/repositories/course_repository.dart';
-import '../models/course_model.dart';
+import 'package:luarsekolah_app/features/course/domain/entities/course_entity.dart';
+import 'package:luarsekolah_app/features/course/domain/repositories/course_repository.dart';
+import 'package:luarsekolah_app/features/course/data/models/course_model.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
   final Dio _dio;
@@ -25,7 +26,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return [];
     } catch (e) {
-      print('Error fetching all courses: $e');
+      developer.log('Error fetching all courses', name: 'CourseRepository', error: e);
       return [];
     }
   }
@@ -51,7 +52,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return [];
     } catch (e) {
-      print('Error fetching courses by category: $e');
+      developer.log('Error fetching courses by category', name: 'CourseRepository', error: e);
       return [];
     }
   }
@@ -67,7 +68,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return null;
     } catch (e) {
-      print('Error fetching course by id: $e');
+      developer.log('Error fetching course by id', name: 'CourseRepository', error: e);
       return null;
     }
   }
@@ -102,7 +103,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error creating course: $e');
+      developer.log('Error creating course', name: 'CourseRepository', error: e);
       return false;
     }
   }
@@ -141,7 +142,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error updating course: $e');
+      developer.log('Error updating course', name: 'CourseRepository', error: e);
       return false;
     }
   }
@@ -153,7 +154,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error deleting course: $e');
+      developer.log('Error deleting course', name: 'CourseRepository', error: e);
       return false;
     }
   }

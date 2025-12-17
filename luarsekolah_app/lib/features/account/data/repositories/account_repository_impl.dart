@@ -2,7 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../domain/repositories/account_repository.dart';
+import 'package:luarsekolah_app/features/account/domain/repositories/account_repository.dart';
 
 class AccountRepositoryImpl implements AccountRepository {
   final FirebaseAuth _firebaseAuth;

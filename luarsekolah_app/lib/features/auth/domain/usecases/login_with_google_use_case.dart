@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../entities/user_entity.dart';
-import '../repositories/auth_repository.dart';
-import '../../../../core/error/failures.dart';
+import 'package:luarsekolah_app/features/auth/domain/entities/user_entity.dart';
+import 'package:luarsekolah_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:luarsekolah_app/core/error/failures.dart';
 
 class LoginWithGoogleUseCase {
   final AuthRepository repository;

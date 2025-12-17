@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+import 'package:luarsekolah_app/features/home/presentation/controllers/home_controller.dart';
 
 class BannerCarouselWidget extends GetView<HomeController> {
-  const BannerCarouselWidget({Key? key}) : super(key: key);
+  const BannerCarouselWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class BannerCarouselWidget extends GetView<HomeController> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

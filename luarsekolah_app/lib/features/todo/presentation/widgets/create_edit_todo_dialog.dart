@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/todo_entity.dart';
-import '../controllers/todo_controller.dart';
+import 'package:luarsekolah_app/features/todo/domain/entities/todo_entity.dart';
+import 'package:luarsekolah_app/features/todo/presentation/controllers/todo_controller.dart';
 
 class CreateEditTodoDialog extends GetView<TodoController> {
   final TodoEntity? todo;
@@ -177,7 +177,7 @@ class CreateEditTodoDialog extends GetView<TodoController> {
       Get.back();
     } catch (e) {
       // Error handling is done in controller
-      print('[CreateEditTodoDialog] Error: $e');
+      debugPrint('[CreateEditTodoDialog] Error: $e');
     } finally {
       isSubmitting.value = false;
     }

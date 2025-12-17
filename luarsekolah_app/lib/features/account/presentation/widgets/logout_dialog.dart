@@ -6,9 +6,8 @@ class LogoutDialog extends StatelessWidget {
   final VoidCallback onConfirm;
 
   const LogoutDialog({
-    Key? key,
-    required this.onConfirm,
-  }) : super(key: key);
+    required this.onConfirm, super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

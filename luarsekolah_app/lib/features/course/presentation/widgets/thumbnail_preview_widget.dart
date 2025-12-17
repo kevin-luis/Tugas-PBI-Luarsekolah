@@ -5,9 +5,8 @@ class ThumbnailPreviewWidget extends StatelessWidget {
   final Rxn<String> thumbnailPath;
 
   const ThumbnailPreviewWidget({
-    Key? key,
-    required this.thumbnailPath,
-  }) : super(key: key);
+    required this.thumbnailPath, super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
